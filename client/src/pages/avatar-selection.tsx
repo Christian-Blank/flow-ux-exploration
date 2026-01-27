@@ -32,7 +32,7 @@ export default function AvatarSelection() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-80px)] p-4 md:p-8 flex flex-col">
+    <div className="max-w-7xl mx-auto min-h-screen p-4 md:p-8 flex flex-col pb-32">
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border/60 pb-4 mb-8">
         <div>
@@ -51,10 +51,10 @@ export default function AvatarSelection() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col md:flex-row gap-8 overflow-hidden relative">
+      <div className="flex-1 flex flex-col md:flex-row gap-8 relative">
           
           {/* Avatar Area (Center/Left) */}
-          <div className="flex-1 relative flex items-center justify-center bg-white border border-border chamfer-lg overflow-hidden">
+          <div className="flex-1 relative flex items-center justify-center bg-white border border-border chamfer-lg overflow-hidden min-h-[600px] py-12">
               {/* Grid Background */}
               <div className="absolute inset-0 opacity-5 pointer-events-none" 
                   style={{ backgroundImage: 'linear-gradient(0deg, transparent 24%, #000 25%, #000 26%, transparent 27%, transparent 74%, #000 75%, #000 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, #000 25%, #000 26%, transparent 27%, transparent 74%, #000 75%, #000 76%, transparent 77%, transparent)', backgroundSize: '50px 50px' }} 
