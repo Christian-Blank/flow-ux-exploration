@@ -14,6 +14,18 @@ interface FeaturesOverviewProps {
 
 const FEATURES = [
     {
+        category: "Interface",
+        icon: Zap,
+        title: "Liquid UX",
+        description: "A modern, gesture-first interface. Swipe to discover, tap to expand. Recommendations update live as you interact, keeping everything fluid and at your fingertips."
+    },
+    {
+        category: "Insight",
+        icon: Layers,
+        title: "Live Feedback Loop",
+        description: "Your Shortlist and Shopping List are living entities. The system learns instantly from what you save, reject, or hesitate on, refining its understanding of your taste in real-time."
+    },
+    {
         category: "Discovery",
         icon: Sparkles,
         title: "Contextual AI Shopping",
