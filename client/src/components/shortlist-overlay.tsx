@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ComparisonView } from "@/components/comparison-view";
-import { InventoryItemDetail } from "@/components/inventory-item-detail";
+import { InventoryItemDetail, CapsuleRecommendation } from "@/components/inventory-item-detail";
+import { CapsuleDetailView, CapsuleData } from "@/components/capsule-detail-view";
 
 // Extended Product Type with Status
 export type ProductStatus = 'shortlisted' | 'bought' | 'considering' | 'problem' | 'owned';
@@ -45,12 +46,14 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
   const [buyConfirmationItem, setBuyConfirmationItem] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState<'shortlist' | 'inventory'>('shortlist');
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<Product | null>(null);
+  const [viewingCapsule, setViewingCapsule] = useState<CapsuleData | null>(null);
 
   // Sync tab with props
   useEffect(() => {
     if (isOpen) {
         setActiveTab(initialTab);
         setSelectedInventoryItem(null); // Reset detail view when opening fresh
+        setViewingCapsule(null);
     }
   }, [isOpen, initialTab]);
 
@@ -192,10 +195,16 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto relative bg-muted/5">
-                    {selectedInventoryItem ? (
+                    {viewingCapsule ? (
+                        <CapsuleDetailView 
+                            capsule={viewingCapsule}
+                            onBack={() => setViewingCapsule(null)}
+                        />
+                    ) : selectedInventoryItem ? (
                         <InventoryItemDetail 
                             product={selectedInventoryItem}
                             onBack={() => setSelectedInventoryItem(null)}
+                            onOpenCapsule={(capsule) => setViewingCapsule(capsule as unknown as CapsuleData)}
                         />
                     ) : isComparing ? (
                          <div className="h-full min-h-[600px] p-6">

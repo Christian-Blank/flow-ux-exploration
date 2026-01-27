@@ -15,7 +15,10 @@ import { Product } from "./shortlist-overlay";
 interface InventoryItemDetailProps {
   product: Product;
   onBack: () => void;
+  onOpenCapsule?: (capsule: CapsuleRecommendation) => void;
 }
+
+export type { CapsuleRecommendation }; // Export for use in parent
 
 // Mock extended data types
 interface Artifact {
@@ -98,7 +101,7 @@ const MOCK_INITIAL_DATA = {
 
 type Condition = 'mint' | 'good' | 'fair' | 'broken';
 
-export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProps) {
+export function InventoryItemDetail({ product, onBack, onOpenCapsule }: InventoryItemDetailProps) {
   const [images, setImages] = useState([product.image, ...MOCK_INITIAL_DATA.userImages]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [condition, setCondition] = useState<Condition>('good');
@@ -428,7 +431,18 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                                                      <Info className="w-3 h-3 mt-0.5 shrink-0" />
                                                      <p>{capsule.reasoning}</p>
                                                  </div>
-                                                 <Button size="sm" className="w-full mt-3 h-7 text-xs bg-primary text-white" onClick={(e) => { e.stopPropagation(); alert(`Opening capsule: ${capsule.name}`); }}>
+                                                 <Button 
+                                                     size="sm" 
+                                                     className="w-full mt-3 h-7 text-xs bg-primary text-white" 
+                                                     onClick={(e) => { 
+                                                         e.stopPropagation(); 
+                                                         if (onOpenCapsule) {
+                                                             onOpenCapsule(capsule);
+                                                         } else {
+                                                             alert(`Opening capsule: ${capsule.name}`); 
+                                                         }
+                                                     }}
+                                                 >
                                                      VIEW FULL CAPSULE
                                                  </Button>
                                              </div>
