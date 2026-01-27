@@ -3,7 +3,7 @@ import { ScenarioCard } from "@/components/scenario-card";
 import { ChatInterface } from "@/components/chat-interface";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Mock Data
+// Mock Data (Unchanged)
 const INITIAL_SCENARIOS = [
   {
     id: "travel",
@@ -37,13 +37,13 @@ const MOCK_UPDATES = [
       id: "adventure",
       title: "Adventure",
       description: "High-octane thrill seeking in neon-lit cyber cities.",
-      imageUrl: "/images/scenario-explore.png", // Reusing for mock
+      imageUrl: "/images/scenario-explore.png",
     },
     {
       id: "relax",
       title: "Relaxation",
       description: "Zen gardens suspended in zero-gravity space.",
-      imageUrl: "/images/scenario-home.png", // Reusing for mock
+      imageUrl: "/images/scenario-home.png",
     },
   ],
   [
@@ -51,19 +51,19 @@ const MOCK_UPDATES = [
       id: "luxury",
       title: "Luxury",
       description: "Gold-plated orbital stations with premium services.",
-      imageUrl: "/images/scenario-work.png", // Reusing for mock
+      imageUrl: "/images/scenario-work.png",
     },
     {
       id: "wild",
       title: "Wilderness",
       description: "Bioluminescent forests untouched by civilization.",
-      imageUrl: "/images/scenario-travel.png", // Reusing for mock
+      imageUrl: "/images/scenario-travel.png",
     },
     {
       id: "retro",
       title: "Retro",
       description: "Analog nostalgia in a digital age.",
-      imageUrl: "/images/scenario-home.png", // Reusing for mock
+      imageUrl: "/images/scenario-home.png",
     },
   ],
 ];
@@ -72,6 +72,7 @@ export default function ScenarioPicker() {
   const [scenarios, setScenarios] = useState(INITIAL_SCENARIOS);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [interactionCount, setInteractionCount] = useState(0);
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
 
   const handleScenarioClick = (id: string) => {
     console.log("Selected scenario:", id);
@@ -80,16 +81,10 @@ export default function ScenarioPicker() {
 
   const handleSendMessage = (message: string) => {
     setIsAiThinking(true);
-    
-    // Simulate AI processing delay
     setTimeout(() => {
-      // Rotate through mock updates based on interaction count
       const nextUpdate = MOCK_UPDATES[interactionCount % MOCK_UPDATES.length];
-      
-      // Keep one random scenario from current set and add new ones
       const keptScenario = scenarios[0]; 
       const newScenarios = [keptScenario, ...nextUpdate].slice(0, 4);
-      
       setScenarios(newScenarios);
       setIsAiThinking(false);
       setInteractionCount(prev => prev + 1);
@@ -97,7 +92,7 @@ export default function ScenarioPicker() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row overflow-hidden relative">
+    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       
       {/* Decorative Frame Lines */}
       <div className="absolute inset-4 border border-border/50 pointer-events-none rounded-xl" />
@@ -107,7 +102,7 @@ export default function ScenarioPicker() {
       <div className="absolute bottom-8 right-8 w-[1px] h-32 bg-primary/40" />
 
       {/* Main Content Area - Scenarios */}
-      <div className="flex-1 p-8 md:p-12 flex flex-col z-10 overflow-y-auto md:overflow-hidden relative">
+      <div className="flex-1 p-8 md:p-12 flex flex-col z-10 overflow-y-auto pb-32">
         <header className="mb-10 flex items-end justify-between border-b border-border/60 pb-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -125,7 +120,7 @@ export default function ScenarioPicker() {
           </div>
         </header>
 
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center content-center pb-24 md:pb-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start content-start">
           <AnimatePresence mode="popLayout">
             {scenarios.map((scenario, index) => (
               <ScenarioCard
@@ -139,25 +134,37 @@ export default function ScenarioPicker() {
         </div>
       </div>
 
-      {/* Chat Sidebar */}
+      {/* Backdrop for Expanded Chat */}
+      <AnimatePresence>
+        {isChatExpanded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
+            onClick={() => setIsChatExpanded(false)} // Close on backdrop click
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Chat Bar / Expanded Sheet */}
       <motion.div 
-        className="fixed bottom-0 left-0 right-0 md:relative md:w-[400px] z-20 flex flex-col shadow-2xl md:shadow-none"
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="fixed bottom-0 left-0 right-0 z-50 shadow-2xl border-t border-border bg-white"
+        initial={{ height: "80px" }}
+        animate={{ 
+          height: isChatExpanded ? "70vh" : "80px",
+          y: 0 
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 25 }}
       >
-        <div className="h-[350px] md:h-screen flex flex-col bg-background md:pt-12 md:pb-12 md:pr-12">
-            <div className="h-full border border-border shadow-xl bg-white relative overflow-hidden">
-                {/* Tech details on chat container */}
-                <div className="absolute top-0 right-0 p-2 z-10">
-                    <div className="w-16 h-16 border-t-2 border-r-2 border-accent/50 rounded-tr-xl" />
-                </div>
-                <ChatInterface 
-                    onSendMessage={handleSendMessage} 
-                    isAiThinking={isAiThinking}
-                    className="h-full"
-                />
-            </div>
+        <div className="h-full border-x border-border max-w-7xl mx-auto bg-white relative">
+            <ChatInterface 
+                onSendMessage={handleSendMessage} 
+                isAiThinking={isAiThinking}
+                isExpanded={isChatExpanded}
+                onExpandToggle={() => setIsChatExpanded(!isChatExpanded)}
+                className="h-full"
+            />
         </div>
       </motion.div>
     </div>
