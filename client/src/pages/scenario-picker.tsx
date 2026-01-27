@@ -97,36 +97,41 @@ export default function ScenarioPicker() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row overflow-hidden relative selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row overflow-hidden relative">
       
-      {/* Background Elements */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none" />
+      {/* Decorative Frame Lines */}
+      <div className="absolute inset-4 border border-border/50 pointer-events-none rounded-xl" />
+      <div className="absolute top-8 left-8 w-32 h-[1px] bg-primary/40" />
+      <div className="absolute top-8 left-8 w-[1px] h-32 bg-primary/40" />
+      <div className="absolute bottom-8 right-8 w-32 h-[1px] bg-primary/40" />
+      <div className="absolute bottom-8 right-8 w-[1px] h-32 bg-primary/40" />
 
       {/* Main Content Area - Scenarios */}
-      <div className="flex-1 p-6 md:p-8 flex flex-col z-10 overflow-y-auto md:overflow-hidden">
-        <header className="mb-8 flex items-center justify-between">
+      <div className="flex-1 p-8 md:p-12 flex flex-col z-10 overflow-y-auto md:overflow-hidden relative">
+        <header className="mb-10 flex items-end justify-between border-b border-border/60 pb-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
-              Choose your Vibe
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Select a scenario or chat with AI to tailor your experience.
+            <div className="flex items-center gap-3 mb-2">
+                <span className="text-2xl font-display font-bold text-primary tracking-widest">-SCENARIO_PICKER</span>
+                <div className="h-[1px] flex-1 bg-border w-12" />
+            </div>
+            <p className="text-muted-foreground font-mono text-xs uppercase tracking-wide">
+              Select initialization vector or refine with AI
             </p>
           </div>
           <div className="hidden md:block">
-            <div className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-muted-foreground backdrop-blur-md">
-              AI Assisted Shopping
+            <div className="px-4 py-2 bg-white border border-border text-xs font-mono text-primary shadow-sm">
+              SYS.STATUS: ONLINE
             </div>
           </div>
         </header>
 
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 items-center content-center pb-24 md:pb-0">
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center content-center pb-24 md:pb-0">
           <AnimatePresence mode="popLayout">
-            {scenarios.map((scenario) => (
+            {scenarios.map((scenario, index) => (
               <ScenarioCard
                 key={scenario.id}
                 {...scenario}
+                index={index}
                 onClick={handleScenarioClick}
               />
             ))}
@@ -134,20 +139,25 @@ export default function ScenarioPicker() {
         </div>
       </div>
 
-      {/* Chat Sidebar / Bottom Sheet */}
+      {/* Chat Sidebar */}
       <motion.div 
-        className="fixed bottom-0 left-0 right-0 md:relative md:w-[400px] md:border-l border-white/10 bg-black/40 backdrop-blur-xl md:backdrop-blur-none md:bg-transparent z-20 flex flex-col"
+        className="fixed bottom-0 left-0 right-0 md:relative md:w-[400px] z-20 flex flex-col shadow-2xl md:shadow-none"
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <div className="p-4 md:p-8 h-[300px] md:h-screen flex flex-col">
-          <div className="md:hidden w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-          <ChatInterface 
-            onSendMessage={handleSendMessage} 
-            isAiThinking={isAiThinking}
-            className="flex-1"
-          />
+        <div className="h-[350px] md:h-screen flex flex-col bg-background md:pt-12 md:pb-12 md:pr-12">
+            <div className="h-full border border-border shadow-xl bg-white relative overflow-hidden">
+                {/* Tech details on chat container */}
+                <div className="absolute top-0 right-0 p-2 z-10">
+                    <div className="w-16 h-16 border-t-2 border-r-2 border-accent/50 rounded-tr-xl" />
+                </div>
+                <ChatInterface 
+                    onSendMessage={handleSendMessage} 
+                    isAiThinking={isAiThinking}
+                    className="h-full"
+                />
+            </div>
         </div>
       </motion.div>
     </div>
