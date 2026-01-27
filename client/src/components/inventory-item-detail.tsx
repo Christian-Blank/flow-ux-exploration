@@ -2,7 +2,7 @@ import { useState } from "react";
 import { 
   X, ChevronLeft, ChevronRight, Calendar, MapPin, Tag, 
   RefreshCcw, Gavel, Repeat, ArrowRightLeft, DollarSign, Recycle, 
-  Camera, Edit3, AlertTriangle, CheckCircle2, Heart, Activity 
+  Camera, Edit3, Activity, FileText, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -16,28 +16,93 @@ interface InventoryItemDetailProps {
   onBack: () => void;
 }
 
+// Mock extended data types
+interface Artifact {
+    id: string;
+    type: 'receipt' | 'repair' | 'cleaning' | 'return';
+    label: string;
+    date: string;
+}
+
+interface ExternalLinkItem {
+    id: string;
+    title: string;
+    url: string;
+}
+
 // Mock extended data for prototype
-const MOCK_EXTENDED_DATA = {
+const MOCK_INITIAL_DATA = {
   purchaseDate: "Oct 12, 2025",
   purchaseLocation: "SOHO Flagship Store, NY",
   userImages: [
     "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80"
-  ]
+  ],
+  artifacts: [
+      { id: '1', type: 'receipt', label: 'Original Purchase Receipt', date: 'Oct 12, 2025' },
+      { id: '2', type: 'cleaning', label: 'Dry Cleaning Slip', date: 'Dec 05, 2025' }
+  ] as Artifact[],
+  links: [
+      { id: '1', title: 'Care & Washing Guide', url: '#' },
+      { id: '2', title: 'Styling Inspiration Board', url: '#' }
+  ] as ExternalLinkItem[]
 };
 
 type Condition = 'mint' | 'good' | 'fair' | 'broken';
 
 export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProps) {
+  const [images, setImages] = useState([product.image, ...MOCK_INITIAL_DATA.userImages]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [condition, setCondition] = useState<Condition>('good');
   const [notes, setNotes] = useState("Really love the fit of this. Wore it to the gallery opening last week.");
-  
-  // Combine product image with user mock images
-  const allImages = [product.image, ...MOCK_EXTENDED_DATA.userImages];
+  const [artifacts, setArtifacts] = useState<Artifact[]>(MOCK_INITIAL_DATA.artifacts);
+  const [links, setLinks] = useState<ExternalLinkItem[]>(MOCK_INITIAL_DATA.links);
 
-  const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
-  const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+
+  const deleteCurrentImage = () => {
+      if (images.length <= 1) {
+          alert("Cannot delete the last image.");
+          return;
+      }
+      const newImages = images.filter((_, idx) => idx !== currentImageIndex);
+      setImages(newImages);
+      setCurrentImageIndex(0);
+  };
+
+  const addMockImage = () => {
+      const mockNewImage = "https://images.unsplash.com/photo-1550614000-4b9519e09d43?auto=format&fit=crop&w=800&q=80";
+      setImages([...images, mockNewImage]);
+      setCurrentImageIndex(images.length); // Jump to new image
+  };
+
+  const deleteArtifact = (id: string) => {
+      setArtifacts(prev => prev.filter(a => a.id !== id));
+  };
+
+  const addMockArtifact = () => {
+      const newArtifact: Artifact = { 
+          id: Date.now().toString(), 
+          type: 'repair', 
+          label: 'Repair Estimate', 
+          date: 'Jan 28, 2026' 
+      };
+      setArtifacts([...artifacts, newArtifact]);
+  };
+
+  const deleteLink = (id: string) => {
+      setLinks(prev => prev.filter(l => l.id !== id));
+  };
+
+  const addMockLink = () => {
+      const newLink: ExternalLinkItem = { 
+          id: Date.now().toString(), 
+          title: 'Repair Shop Reviews', 
+          url: '#' 
+      };
+      setLinks([...links, newLink]);
+  };
 
   const ActionButton = ({ icon: Icon, label, colorClass, onClick }: any) => (
     <Button 
@@ -74,21 +139,21 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
       <div className="flex-1 overflow-y-auto">
         <div className="grid md:grid-cols-2 gap-0 min-h-full">
             
-            {/* Left: Visuals */}
-            <div className="relative bg-muted/10 h-[50vh] md:h-auto flex items-center justify-center p-8 group">
+            {/* Left: Visuals & Media Gallery */}
+            <div className="relative bg-muted/10 h-[50vh] md:h-auto flex flex-col items-center justify-center p-8 group border-r border-border">
                 <AnimatePresence mode="wait">
                     <motion.img 
                         key={currentImageIndex}
-                        src={allImages[currentImageIndex]} 
+                        src={images[currentImageIndex]} 
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="max-h-full max-w-full object-contain shadow-xl rounded-md"
+                        className="max-h-[70%] max-w-full object-contain shadow-xl rounded-md mb-8"
                     />
                 </AnimatePresence>
 
                 {/* Carousel Controls */}
-                <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
+                <div className="absolute inset-x-4 top-[40%] -translate-y-1/2 flex justify-between pointer-events-none">
                     <Button variant="secondary" size="icon" onClick={prevImage} className="rounded-full pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity">
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
@@ -97,17 +162,35 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                     </Button>
                 </div>
 
-                {/* Image Source Indicators */}
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-                    {allImages.map((_, idx) => (
+                {/* Delete Image Action */}
+                <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <Button 
+                        size="icon" 
+                        variant="destructive" 
+                        className="rounded-full w-8 h-8"
+                        onClick={deleteCurrentImage}
+                        disabled={images.length <= 1}
+                     >
+                         <Trash2 className="w-4 h-4" />
+                     </Button>
+                </div>
+
+                {/* Add Photo Action */}
+                <div className="absolute top-4 right-4">
+                    <Button size="sm" variant="secondary" className="gap-2 text-xs font-mono" onClick={addMockImage}>
+                        <Camera className="w-3 h-3" /> ADD MEDIA
+                    </Button>
+                </div>
+
+                {/* Image Dots */}
+                <div className="flex justify-center gap-2 mb-4">
+                    {images.map((_, idx) => (
                         <div key={idx} className={cn("w-1.5 h-1.5 rounded-full transition-all", idx === currentImageIndex ? "bg-primary w-3" : "bg-primary/20")} />
                     ))}
                 </div>
 
-                <div className="absolute top-4 right-4">
-                    <Button size="sm" variant="secondary" className="gap-2 text-xs font-mono">
-                        <Camera className="w-3 h-3" /> ADD PHOTO
-                    </Button>
+                <div className="text-center">
+                    <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Media Gallery ({images.length})</p>
                 </div>
             </div>
 
@@ -121,14 +204,14 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                             <Calendar className="w-3 h-3" />
                             <span className="text-[10px] font-mono uppercase">Acquired</span>
                         </div>
-                        <p className="font-medium text-sm">{MOCK_EXTENDED_DATA.purchaseDate}</p>
+                        <p className="font-medium text-sm">{MOCK_INITIAL_DATA.purchaseDate}</p>
                     </div>
                     <div className="p-3 bg-muted/5 rounded border border-border">
                         <div className="flex items-center gap-2 text-muted-foreground mb-1">
                             <MapPin className="w-3 h-3" />
                             <span className="text-[10px] font-mono uppercase">Location</span>
                         </div>
-                        <p className="font-medium text-sm truncate">{MOCK_EXTENDED_DATA.purchaseLocation}</p>
+                        <p className="font-medium text-sm truncate">{MOCK_INITIAL_DATA.purchaseLocation}</p>
                     </div>
                     <div className="p-3 bg-muted/5 rounded border border-border">
                          <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -155,6 +238,42 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                     </div>
                 </div>
 
+                {/* Digital Artifacts Section */}
+                <div className="space-y-3">
+                     <div className="flex items-center justify-between border-b border-border pb-2">
+                        <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                            <FileText className="w-3 h-3" /> Digital Artifacts
+                        </label>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={addMockArtifact}>
+                            <Plus className="w-4 h-4 text-primary" />
+                        </Button>
+                     </div>
+                     <div className="space-y-2">
+                         {artifacts.length === 0 && <p className="text-xs text-muted-foreground italic">No artifacts uploaded.</p>}
+                         {artifacts.map(artifact => (
+                             <div key={artifact.id} className="flex items-center justify-between p-2 bg-muted/5 border border-border rounded hover:border-primary/50 transition-colors group">
+                                 <div className="flex items-center gap-3">
+                                     <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded flex items-center justify-center">
+                                         <FileText className="w-4 h-4" />
+                                     </div>
+                                     <div>
+                                         <p className="text-xs font-bold">{artifact.label}</p>
+                                         <p className="text-[10px] text-muted-foreground font-mono">{artifact.date} • {artifact.type.toUpperCase()}</p>
+                                     </div>
+                                 </div>
+                                 <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                                    onClick={() => deleteArtifact(artifact.id)}
+                                >
+                                     <Trash2 className="w-3 h-3" />
+                                 </Button>
+                             </div>
+                         ))}
+                     </div>
+                </div>
+
                 {/* Notes Section */}
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
@@ -163,13 +282,51 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                     <Textarea 
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
-                        className="bg-muted/5 border-border focus:border-primary min-h-[100px] text-sm resize-none"
+                        className="bg-muted/5 border-border focus:border-primary min-h-[80px] text-sm resize-none"
                         placeholder="Add details about fit, memories, or defects..."
                     />
                 </div>
 
+                 {/* Linked Resources Section */}
+                 <div className="space-y-3">
+                     <div className="flex items-center justify-between border-b border-border pb-2">
+                        <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                            <LinkIcon className="w-3 h-3" /> Related Links
+                        </label>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={addMockLink}>
+                            <Plus className="w-4 h-4 text-primary" />
+                        </Button>
+                     </div>
+                     <div className="space-y-2">
+                         {links.length === 0 && <p className="text-xs text-muted-foreground italic">No links added.</p>}
+                         {links.map(link => (
+                             <div key={link.id} className="flex items-center justify-between p-2 bg-muted/5 border border-border rounded hover:border-primary/50 transition-colors group">
+                                 <a href={link.url} className="flex items-center gap-3 hover:text-primary transition-colors">
+                                     <div className="w-8 h-8 bg-purple-50 text-purple-600 rounded flex items-center justify-center">
+                                         <LinkIcon className="w-4 h-4" />
+                                     </div>
+                                     <div>
+                                         <p className="text-xs font-bold">{link.title}</p>
+                                         <p className="text-[10px] text-muted-foreground font-mono flex items-center gap-1">
+                                             OPEN RESOURCE <ExternalLink className="w-2 h-2" />
+                                         </p>
+                                     </div>
+                                 </a>
+                                 <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                                    onClick={() => deleteLink(link.id)}
+                                >
+                                     <Trash2 className="w-3 h-3" />
+                                 </Button>
+                             </div>
+                         ))}
+                     </div>
+                </div>
+
                 {/* Lifecycle Management Grid */}
-                <div className="space-y-4">
+                <div className="space-y-4 pt-4 border-t border-border">
                     <h3 className="font-display font-bold text-sm text-muted-foreground border-b border-border pb-2">LIFECYCLE ACTIONS</h3>
                     
                     <div className="grid grid-cols-3 gap-3">
