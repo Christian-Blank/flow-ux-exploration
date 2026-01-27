@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Cpu, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
+import { Cpu, ChevronRight, ChevronUp, ChevronDown, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
+import { ShortlistOverlay } from "@/components/shortlist-overlay";
 
 interface Message {
   role: "user" | "ai";
@@ -22,6 +23,7 @@ export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
   ]);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isShortlistOpen, setIsShortlistOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [location] = useLocation();
@@ -63,6 +65,23 @@ export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-background text-foreground">
+      {/* Shortlist Trigger (Floating or Fixed) */}
+      <div className="fixed top-24 right-4 z-40 pointer-events-auto">
+          <Button 
+            onClick={() => setIsShortlistOpen(true)}
+            className="rounded-full shadow-xl bg-white text-foreground border border-border hover:bg-muted w-12 h-12 p-0 flex items-center justify-center relative group"
+          >
+              <ShoppingBag className="w-5 h-5 text-primary" />
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold">5</div>
+              <span className="absolute right-full mr-3 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  View Shortlist
+              </span>
+          </Button>
+      </div>
+      
+      {/* Shortlist Overlay */}
+      <ShortlistOverlay isOpen={isShortlistOpen} onClose={() => setIsShortlistOpen(false)} />
+
       {/* Main Content Rendered Here */}
       <div className="flex-1 overflow-y-auto pb-24 relative z-10">
         {children}
