@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ComparisonView } from "@/components/comparison-view";
+import { InventoryItemDetail } from "@/components/inventory-item-detail";
 
 // Extended Product Type with Status
 export type ProductStatus = 'shortlisted' | 'bought' | 'considering' | 'problem' | 'owned';
@@ -43,11 +44,13 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
   const [isComparing, setIsComparing] = useState(false);
   const [buyConfirmationItem, setBuyConfirmationItem] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState<'shortlist' | 'inventory'>('shortlist');
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState<Product | null>(null);
 
   // Sync tab with props
   useEffect(() => {
     if (isOpen) {
         setActiveTab(initialTab);
+        setSelectedInventoryItem(null); // Reset detail view when opening fresh
     }
   }, [isOpen, initialTab]);
 
@@ -189,7 +192,12 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto relative bg-muted/5">
-                    {isComparing ? (
+                    {selectedInventoryItem ? (
+                        <InventoryItemDetail 
+                            product={selectedInventoryItem}
+                            onBack={() => setSelectedInventoryItem(null)}
+                        />
+                    ) : isComparing ? (
                          <div className="h-full min-h-[600px] p-6">
                              <ComparisonView 
                                 products={selectedForCompare.map(id => shortlist.find(p => p.id === id)!).filter(Boolean)}
@@ -214,10 +222,16 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
                                     <motion.div 
                                         layout
                                         key={item.id}
-                                        onClick={() => activeTab === 'shortlist' && toggleCompareSelect(item.id)}
+                                        onClick={() => {
+                                            if (activeTab === 'shortlist') {
+                                                toggleCompareSelect(item.id);
+                                            } else {
+                                                setSelectedInventoryItem(item);
+                                            }
+                                        }}
                                         className={cn(
                                             "border transition-all duration-300 relative group overflow-hidden chamfer-sm",
-                                            activeTab === 'shortlist' ? "cursor-pointer" : "cursor-default",
+                                            "cursor-pointer", // Always cursor pointer now
                                             isSelected 
                                                 ? "border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(59,130,246,0.15)] scale-[1.02] z-10" 
                                                 : cn(getStatusColor(item.status), "hover:shadow-md")
