@@ -5,13 +5,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import ScenarioPicker from "@/pages/scenario-picker";
+import ContextUpload from "@/pages/context-upload";
+import { GlobalChatLayout } from "@/components/global-chat-layout";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={ScenarioPicker} />
-      <Route component={NotFound} />
-    </Switch>
+    <GlobalChatLayout>
+      <Switch>
+        <Route path="/" component={ScenarioPicker} />
+        <Route path="/upload-context" component={ContextUpload} />
+        <Route component={NotFound} />
+      </Switch>
+    </GlobalChatLayout>
   );
 }
 

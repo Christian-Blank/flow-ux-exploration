@@ -1,21 +1,21 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { ScenarioCard } from "@/components/scenario-card";
-import { ChatInterface } from "@/components/chat-interface";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Mock Data (Unchanged)
+// Mock Data
 const INITIAL_SCENARIOS = [
-  {
-    id: "travel",
-    title: "Travel",
-    description: "Futuristic escapes to floating islands and ethereal landscapes.",
-    imageUrl: "/images/scenario-travel.png",
-  },
   {
     id: "work",
     title: "Work",
     description: "Minimalist holographic workspaces for deep focus.",
     imageUrl: "/images/scenario-work.png",
+  },
+  {
+    id: "travel",
+    title: "Travel",
+    description: "Futuristic escapes to floating islands and ethereal landscapes.",
+    imageUrl: "/images/scenario-travel.png",
   },
   {
     id: "home",
@@ -31,68 +31,40 @@ const INITIAL_SCENARIOS = [
   },
 ];
 
+// ... MOCK_UPDATES (same as before)
 const MOCK_UPDATES = [
-  [
-    {
-      id: "adventure",
-      title: "Adventure",
-      description: "High-octane thrill seeking in neon-lit cyber cities.",
-      imageUrl: "/images/scenario-explore.png",
-    },
-    {
-      id: "relax",
-      title: "Relaxation",
-      description: "Zen gardens suspended in zero-gravity space.",
-      imageUrl: "/images/scenario-home.png",
-    },
-  ],
-  [
-    {
-      id: "luxury",
-      title: "Luxury",
-      description: "Gold-plated orbital stations with premium services.",
-      imageUrl: "/images/scenario-work.png",
-    },
-    {
-      id: "wild",
-      title: "Wilderness",
-      description: "Bioluminescent forests untouched by civilization.",
-      imageUrl: "/images/scenario-travel.png",
-    },
-    {
-      id: "retro",
-      title: "Retro",
-      description: "Analog nostalgia in a digital age.",
-      imageUrl: "/images/scenario-home.png",
-    },
-  ],
+    [
+      {
+        id: "adventure",
+        title: "Adventure",
+        description: "High-octane thrill seeking in neon-lit cyber cities.",
+        imageUrl: "/images/scenario-explore.png",
+      },
+      {
+        id: "relax",
+        title: "Relaxation",
+        description: "Zen gardens suspended in zero-gravity space.",
+        imageUrl: "/images/scenario-home.png",
+      },
+    ],
+    // ...
 ];
 
 export default function ScenarioPicker() {
+  const [, setLocation] = useLocation();
   const [scenarios, setScenarios] = useState(INITIAL_SCENARIOS);
-  const [isAiThinking, setIsAiThinking] = useState(false);
-  const [interactionCount, setInteractionCount] = useState(0);
-  const [isChatExpanded, setIsChatExpanded] = useState(false);
 
   const handleScenarioClick = (id: string) => {
-    console.log("Selected scenario:", id);
-    // TODO: Navigate to next screen
-  };
-
-  const handleSendMessage = (message: string) => {
-    setIsAiThinking(true);
-    setTimeout(() => {
-      const nextUpdate = MOCK_UPDATES[interactionCount % MOCK_UPDATES.length];
-      const keptScenario = scenarios[0]; 
-      const newScenarios = [keptScenario, ...nextUpdate].slice(0, 4);
-      setScenarios(newScenarios);
-      setIsAiThinking(false);
-      setInteractionCount(prev => prev + 1);
-    }, 2000);
+    if (id === "work") {
+      setLocation("/upload-context");
+    } else {
+      console.log("Selected scenario:", id);
+      // Future navigation for other scenarios
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
+    <div className="min-h-full flex flex-col relative overflow-hidden">
       
       {/* Decorative Frame Lines */}
       <div className="absolute inset-4 border border-border/50 pointer-events-none rounded-xl" />
@@ -133,40 +105,6 @@ export default function ScenarioPicker() {
           </AnimatePresence>
         </div>
       </div>
-
-      {/* Backdrop for Expanded Chat */}
-      <AnimatePresence>
-        {isChatExpanded && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
-            onClick={() => setIsChatExpanded(false)} // Close on backdrop click
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Chat Bar / Expanded Sheet */}
-      <motion.div 
-        className="fixed bottom-0 left-0 right-0 z-50 shadow-2xl border-t border-border bg-white"
-        initial={{ height: "80px" }}
-        animate={{ 
-          height: isChatExpanded ? "70vh" : "80px",
-          y: 0 
-        }}
-        transition={{ type: "spring", stiffness: 200, damping: 25 }}
-      >
-        <div className="h-full border-x border-border max-w-7xl mx-auto bg-white relative">
-            <ChatInterface 
-                onSendMessage={handleSendMessage} 
-                isAiThinking={isAiThinking}
-                isExpanded={isChatExpanded}
-                onExpandToggle={() => setIsChatExpanded(!isChatExpanded)}
-                className="h-full"
-            />
-        </div>
-      </motion.div>
     </div>
   );
 }
