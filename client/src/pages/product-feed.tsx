@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { ReasoningOverlay } from "@/components/reasoning-overlay";
 
 // Types
-type VoteStatus = "liked" | "disliked" | "shortlisted" | "pending";
+type VoteStatus = "liked" | "disliked" | "shortlisted" | "pending" | "owned";
 
 interface Product {
   id: string;
@@ -115,7 +115,8 @@ export default function ProductFeed() {
                                 isActive ? "w-16 h-16 border-primary ring-2 ring-primary ring-offset-2" : "border-border opacity-70 hover:opacity-100 hover:border-primary/50",
                                 item.status === 'liked' && !isActive && "border-green-500",
                                 item.status === 'disliked' && !isActive && "border-destructive opacity-40 grayscale",
-                                item.status === 'shortlisted' && !isActive && "border-blue-500"
+                                item.status === 'shortlisted' && !isActive && "border-blue-500",
+                                item.status === 'owned' && !isActive && "border-cyan-500"
                             )}
                         >
                             <img src={item.images[0]} className="w-full h-full object-cover" />
@@ -129,6 +130,7 @@ export default function ProductFeed() {
                                     {item.status === 'liked' && <Heart className="w-4 h-4 text-green-400 fill-current" />}
                                     {item.status === 'disliked' && <X className="w-4 h-4 text-destructive" />}
                                     {item.status === 'shortlisted' && <Bookmark className="w-4 h-4 text-blue-400 fill-current" />}
+                                    {item.status === 'owned' && <Box className="w-4 h-4 text-cyan-400 fill-current" />}
                                 </div>
                             )}
                             
@@ -260,18 +262,19 @@ export default function ProductFeed() {
                                  {currentProduct.status === 'liked' && "LIKED"}
                                  {currentProduct.status === 'disliked' && "DISMISSED"}
                                  {currentProduct.status === 'shortlisted' && "SHORTLISTED"}
+                                 {currentProduct.status === 'owned' && "ADDED TO INVENTORY"}
                              </span>
                          </div>
                      )}
 
-                    <div className="grid grid-cols-3 gap-4 h-16">
+                    <div className="grid grid-cols-4 gap-2 h-16">
                         <Button 
                             variant="outline"
                             className="h-full rounded-xl border-2 border-muted hover:border-destructive hover:bg-destructive/5 hover:text-destructive transition-all flex flex-col gap-1 items-center justify-center group"
                             onClick={() => handleVote('disliked')}
                         >
-                            <X className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-mono font-bold">NOT FOR ME</span>
+                            <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <span className="text-[9px] font-mono font-bold">NO</span>
                         </Button>
 
                         <Button 
@@ -279,16 +282,25 @@ export default function ProductFeed() {
                             className="h-full rounded-xl border-2 border-muted hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 transition-all flex flex-col gap-1 items-center justify-center group"
                             onClick={() => handleVote('shortlisted')}
                         >
-                            <Bookmark className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-mono font-bold">SHORTLIST</span>
+                            <Bookmark className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <span className="text-[9px] font-mono font-bold">SHORTLIST</span>
+                        </Button>
+
+                         <Button 
+                            variant="outline"
+                            className="h-full rounded-xl border-2 border-muted hover:border-cyan-500 hover:bg-cyan-50 hover:text-cyan-600 transition-all flex flex-col gap-1 items-center justify-center group"
+                            onClick={() => handleVote('owned')}
+                        >
+                            <Box className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <span className="text-[9px] font-mono font-bold">OWN IT</span>
                         </Button>
 
                         <Button 
                             className="h-full rounded-xl bg-primary hover:bg-green-600 text-white transition-all flex flex-col gap-1 items-center justify-center shadow-lg hover:shadow-green-500/25 group"
                             onClick={() => handleVote('liked')}
                         >
-                            <Heart className="w-6 h-6 fill-current group-hover:scale-125 transition-transform" />
-                            <span className="text-[10px] font-mono font-bold">I LIKE IT</span>
+                            <Heart className="w-5 h-5 fill-current group-hover:scale-125 transition-transform" />
+                            <span className="text-[9px] font-mono font-bold">LIKE</span>
                         </Button>
                     </div>
                 </div>

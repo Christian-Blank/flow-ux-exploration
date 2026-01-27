@@ -11,6 +11,7 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  status?: string; // Add status support
   attributes: {
       formality: string;
       material: string;
@@ -63,7 +64,10 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                             key={product ? product.id : `empty-${idx}`} 
                             className={cn(
                                 "relative group overflow-hidden transition-all",
-                                productHidden ? "bg-muted/10" : "flex-1"
+                                productHidden ? "bg-muted/10" : "flex-1",
+                                // Highlight Bought/Considering items in matrix too
+                                product && product.status === 'bought' && "bg-amber-50/30",
+                                product && product.status === 'considering' && "bg-purple-50/30"
                             )}
                         >
                             {product ? (

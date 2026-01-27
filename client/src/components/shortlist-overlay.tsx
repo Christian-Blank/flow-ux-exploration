@@ -1,17 +1,20 @@
-import { useState } from "react";
-import { X, ShoppingBag, ArrowRight, Trash2, Bookmark, Check, ExternalLink, RefreshCw, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, ShoppingBag, ArrowRight, Trash2, Bookmark, Check, ExternalLink, RefreshCw, AlertCircle, Box, Archive } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ComparisonView } from "@/components/comparison-view";
 
-// Reuse Product Type
-interface Product {
+// Extended Product Type with Status
+export type ProductStatus = 'shortlisted' | 'bought' | 'considering' | 'problem' | 'owned';
+
+export interface Product {
   id: string;
   brand: string;
   name: string;
   price: number;
   image: string;
+  status: ProductStatus;
   attributes: {
       formality: string;
       material: string;
@@ -21,18 +24,32 @@ interface Product {
 
 // Mock Shortlist Data
 const MOCK_SHORTLIST: Product[] = [
-    { id: "1", brand: "Acne Studios", name: "North Skinny Jeans", price: 240, image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=300&q=80", attributes: { formality: "Casual", material: "Denim", fit: "Skinny" } },
-    { id: "2", brand: "Uniqlo U", name: "Crew Neck T-Shirt", price: 19, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=300&q=80", attributes: { formality: "Basic", material: "Cotton", fit: "Regular" } },
-    { id: "3", brand: "Nike", name: "Air Force 1 '07", price: 110, image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=300&q=80", attributes: { formality: "Street", material: "Leather", fit: "Standard" } },
-    { id: "4", brand: "Patagonia", name: "Better Sweater", price: 149, image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=300&q=80", attributes: { formality: "Outdoor", material: "Fleece", fit: "Relaxed" } },
-    { id: "5", brand: "Common Projects", name: "Achilles Low", price: 410, image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=300&q=80", attributes: { formality: "Smart Casual", material: "Leather", fit: "Narrow" } },
+    { id: "1", brand: "Acne Studios", name: "North Skinny Jeans", price: 240, image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=300&q=80", status: 'shortlisted', attributes: { formality: "Casual", material: "Denim", fit: "Skinny" } },
+    { id: "2", brand: "Uniqlo U", name: "Crew Neck T-Shirt", price: 19, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=300&q=80", status: 'owned', attributes: { formality: "Basic", material: "Cotton", fit: "Regular" } },
+    { id: "3", brand: "Nike", name: "Air Force 1 '07", price: 110, image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=300&q=80", status: 'shortlisted', attributes: { formality: "Street", material: "Leather", fit: "Standard" } },
+    { id: "4", brand: "Patagonia", name: "Better Sweater", price: 149, image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=300&q=80", status: 'bought', attributes: { formality: "Outdoor", material: "Fleece", fit: "Relaxed" } },
+    { id: "5", brand: "Common Projects", name: "Achilles Low", price: 410, image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=300&q=80", status: 'considering', attributes: { formality: "Smart Casual", material: "Leather", fit: "Narrow" } },
 ];
 
-export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+interface ShortlistOverlayProps {
+    isOpen: boolean; 
+    onClose: () => void;
+    initialTab?: 'shortlist' | 'inventory';
+}
+
+export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: ShortlistOverlayProps) {
   const [shortlist, setShortlist] = useState<Product[]>(MOCK_SHORTLIST);
   const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
   const [buyConfirmationItem, setBuyConfirmationItem] = useState<Product | null>(null);
+  const [activeTab, setActiveTab] = useState<'shortlist' | 'inventory'>('shortlist');
+
+  // Sync tab with props
+  useEffect(() => {
+    if (isOpen) {
+        setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
 
   const toggleCompareSelect = (id: string) => {
     if (selectedForCompare.includes(id)) {
@@ -49,18 +66,47 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
       setSelectedForCompare(prev => prev.filter(i => i !== id));
   };
 
+  const updateStatus = (id: string, status: ProductStatus) => {
+      setShortlist(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+  };
+
   const handleBuyClick = (item: Product) => {
-      // Open in new tab (mock)
       window.open('#', '_blank');
-      // Show confirmation modal on return
       setBuyConfirmationItem(item);
   };
 
-  const handlePostPurchaseFeedback = (feedback: string) => {
-      console.log("Purchase feedback:", feedback);
+  const handlePostPurchaseFeedback = (feedback: 'bought' | 'considering' | 'failed') => {
+      if (buyConfirmationItem) {
+          const newStatus = feedback === 'bought' ? 'bought' : feedback === 'considering' ? 'considering' : 'problem';
+          updateStatus(buyConfirmationItem.id, newStatus);
+      }
       setBuyConfirmationItem(null);
-      // Logic to move to "Archive" or remove from shortlist would go here
   };
+
+  // Helper for Status Colors
+  const getStatusColor = (status: ProductStatus) => {
+      switch (status) {
+          case 'bought': return "bg-amber-50/50 border-amber-200 text-amber-800 ring-amber-100";
+          case 'considering': return "bg-purple-50/50 border-purple-200 text-purple-800 ring-purple-100";
+          case 'problem': return "bg-stone-50/50 border-stone-200 text-stone-600 grayscale ring-stone-100";
+          case 'owned': return "bg-cyan-50/50 border-cyan-200 text-cyan-800 ring-cyan-100";
+          default: return "bg-white border-border hover:border-primary/30";
+      }
+  };
+
+  // Filter List Logic
+  const displayedItems = shortlist.filter(item => {
+      if (activeTab === 'inventory') {
+          return item.status === 'owned' || item.status === 'bought';
+      } else {
+          // Shortlist shows everything EXCEPT purely owned items (owned items go to inventory)
+          // But 'bought' items stay in shortlist temporarily to show success, or can move.
+          // For now, let's keep 'bought' in both or just shortlist. 
+          // Let's say Shortlist is active decision making. Inventory is "Done".
+          // 'bought' items are technically owned, but maybe user wants to see them in context.
+          return item.status !== 'owned';
+      }
+  });
 
   return (
     <AnimatePresence>
@@ -84,22 +130,44 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
                 className="relative w-full md:w-[600px] lg:w-[800px] bg-background border-l border-border shadow-2xl h-full flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
+                {/* Header with Tabs */}
                 <div className="flex items-center justify-between p-6 border-b border-border bg-white z-10 relative">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-xl font-display font-bold text-primary tracking-widest">
-                                {isComparing ? "COMPARISON_MATRIX" : "ACTIVE_SHORTLIST"}
-                            </span>
-                            {!isComparing && (
-                                <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-mono rounded-sm">
-                                    {shortlist.length} ITEMS
-                                </span>
-                            )}
+                    <div className="flex-1">
+                        <div className="flex items-center gap-6 mb-2">
+                             {/* Tabs */}
+                             <button 
+                                onClick={() => !isComparing && setActiveTab('shortlist')}
+                                className={cn(
+                                    "text-lg font-display font-bold tracking-widest transition-colors relative",
+                                    activeTab === 'shortlist' ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                                    isComparing && "opacity-50 cursor-not-allowed"
+                                )}
+                             >
+                                 SHORTLIST
+                                 {activeTab === 'shortlist' && <motion.div layoutId="activeTab" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary" />}
+                             </button>
+                             <button 
+                                onClick={() => !isComparing && setActiveTab('inventory')}
+                                className={cn(
+                                    "text-lg font-display font-bold tracking-widest transition-colors relative",
+                                    activeTab === 'inventory' ? "text-cyan-600" : "text-muted-foreground hover:text-foreground",
+                                    isComparing && "opacity-50 cursor-not-allowed"
+                                )}
+                             >
+                                 INVENTORY
+                                 {activeTab === 'inventory' && <motion.div layoutId="activeTab" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-cyan-600" />}
+                             </button>
                         </div>
-                        <p className="text-xs font-mono text-muted-foreground mt-1">
-                            {isComparing ? "Analyzing 3-way vector compatibilities" : "Select up to 3 items to compare nuances"}
-                        </p>
+                        <div className="flex items-center gap-3">
+                            <span className="px-2 py-1 bg-muted text-muted-foreground text-[10px] font-mono rounded-sm">
+                                {displayedItems.length} ITEMS
+                            </span>
+                            <p className="text-xs font-mono text-muted-foreground">
+                                {isComparing 
+                                    ? "Analyzing 3-way vector compatibilities" 
+                                    : activeTab === 'shortlist' ? "Select items to compare nuances" : "Digital twin assets you own"}
+                            </p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-2">
                          {isComparing ? (
@@ -140,22 +208,36 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
                          </div>
                     ) : (
                         <div className="p-6 grid grid-cols-2 gap-4">
-                            {shortlist.map((item) => {
+                            {displayedItems.map((item) => {
                                 const isSelected = selectedForCompare.includes(item.id);
                                 return (
                                     <motion.div 
                                         layout
                                         key={item.id}
-                                        onClick={() => toggleCompareSelect(item.id)}
+                                        onClick={() => activeTab === 'shortlist' && toggleCompareSelect(item.id)}
                                         className={cn(
-                                            "bg-white border transition-all duration-300 relative group overflow-hidden chamfer-sm cursor-pointer",
+                                            "border transition-all duration-300 relative group overflow-hidden chamfer-sm",
+                                            activeTab === 'shortlist' ? "cursor-pointer" : "cursor-default",
                                             isSelected 
                                                 ? "border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(59,130,246,0.15)] scale-[1.02] z-10" 
-                                                : "border-border hover:border-primary/50 hover:shadow-md"
+                                                : cn(getStatusColor(item.status), "hover:shadow-md")
                                         )}
                                     >
                                         <div className="aspect-[4/3] relative">
                                             <img src={item.image} className="w-full h-full object-cover" />
+                                            
+                                            {/* Status Badge */}
+                                            {item.status !== 'shortlisted' && (
+                                                <div className={cn(
+                                                    "absolute top-2 left-2 px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/90 backdrop-blur-sm rounded-sm shadow-sm",
+                                                    item.status === 'bought' && "text-amber-600",
+                                                    item.status === 'owned' && "text-cyan-600",
+                                                    item.status === 'considering' && "text-purple-600",
+                                                    item.status === 'problem' && "text-stone-500",
+                                                )}>
+                                                    {item.status}
+                                                </div>
+                                            )}
                                             
                                             {/* Selection Indicator (Subtle Check) */}
                                             <AnimatePresence>
@@ -172,25 +254,30 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
                                             </AnimatePresence>
 
                                             {/* Actions Overlay */}
-                                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-center" onClick={(e) => e.stopPropagation()}>
-                                                 <button 
-                                                    className="text-white hover:text-red-400 transition-colors p-1"
-                                                    onClick={() => removeItem(item.id)}
-                                                 >
-                                                     <Trash2 className="w-4 h-4" />
-                                                 </button>
-                                                 <button 
-                                                    className="bg-white text-black px-3 py-1 text-[10px] font-bold font-mono hover:bg-white/90"
-                                                    onClick={() => handleBuyClick(item)}
-                                                 >
-                                                     BUY_NOW
-                                                 </button>
-                                            </div>
+                                            {activeTab === 'shortlist' && (
+                                                <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-center" onClick={(e) => e.stopPropagation()}>
+                                                    <button 
+                                                        className="text-white hover:text-red-400 transition-colors p-1"
+                                                        onClick={() => removeItem(item.id)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button 
+                                                        className="bg-white text-black px-3 py-1 text-[10px] font-bold font-mono hover:bg-white/90"
+                                                        onClick={() => handleBuyClick(item)}
+                                                    >
+                                                        BUY_NOW
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className={cn("p-3 transition-colors", isSelected && "bg-primary/5")}>
                                             <p className="text-[10px] font-mono text-muted-foreground uppercase">{item.brand}</p>
                                             <p className="text-sm font-bold truncate">{item.name}</p>
-                                            <p className="text-xs font-mono mt-1">${item.price}</p>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <p className="text-xs font-mono">${item.price}</p>
+                                                {item.status === 'considering' && <span className="text-[10px] text-purple-600 font-bold">DECIDING...</span>}
+                                            </div>
                                         </div>
                                     </motion.div>
                                 );
@@ -200,7 +287,7 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
                 </div>
 
                 {/* Footer Action Bar */}
-                {!isComparing && (
+                {activeTab === 'shortlist' && !isComparing && (
                     <div className="p-6 border-t border-border bg-white">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-mono text-muted-foreground">
@@ -237,21 +324,21 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
                                 
                                 <div className="grid gap-3">
                                     <Button 
-                                        className="w-full bg-green-600 hover:bg-green-700"
+                                        className="w-full bg-amber-500 hover:bg-amber-600 text-white border-none"
                                         onClick={() => handlePostPurchaseFeedback("bought")}
                                     >
                                         YES, PURCHASE CONFIRMED
                                     </Button>
                                     <Button 
                                         variant="outline" 
-                                        className="w-full"
+                                        className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
                                         onClick={() => handlePostPurchaseFeedback("considering")}
                                     >
                                         STILL DECIDING / NEED INFO
                                     </Button>
                                     <Button 
                                         variant="ghost" 
-                                        className="w-full text-muted-foreground hover:text-destructive"
+                                        className="w-full text-muted-foreground hover:text-stone-600"
                                         onClick={() => handlePostPurchaseFeedback("failed")}
                                     >
                                         NO, SOMETHING WENT WRONG

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Cpu, ChevronRight, ChevronUp, ChevronDown, ShoppingBag } from "lucide-react";
+import { Cpu, ChevronRight, ChevronUp, ChevronDown, ShoppingBag, Archive, Box } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isShortlistOpen, setIsShortlistOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'shortlist' | 'inventory'>('shortlist');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [location] = useLocation();
@@ -63,12 +64,18 @@ export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
     }, 1500);
   };
 
+  const openShortlist = (tab: 'shortlist' | 'inventory') => {
+      setActiveTab(tab);
+      setIsShortlistOpen(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-background text-foreground">
-      {/* Shortlist Trigger (Floating or Fixed) */}
-      <div className="fixed top-24 right-4 z-40 pointer-events-auto">
+      {/* Global Actions (Floating or Fixed) */}
+      <div className="fixed top-24 right-4 z-40 pointer-events-auto flex flex-col gap-3">
+          {/* Shortlist Button */}
           <Button 
-            onClick={() => setIsShortlistOpen(true)}
+            onClick={() => openShortlist('shortlist')}
             className="rounded-full shadow-xl bg-white text-foreground border border-border hover:bg-muted w-12 h-12 p-0 flex items-center justify-center relative group"
           >
               <ShoppingBag className="w-5 h-5 text-primary" />
@@ -77,10 +84,25 @@ export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
                   View Shortlist
               </span>
           </Button>
+
+           {/* Inventory Button */}
+           <Button 
+            onClick={() => openShortlist('inventory')}
+            className="rounded-full shadow-xl bg-white text-foreground border border-border hover:bg-muted w-12 h-12 p-0 flex items-center justify-center relative group"
+          >
+              <Box className="w-5 h-5 text-cyan-600" />
+              <span className="absolute right-full mr-3 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  My Inventory
+              </span>
+          </Button>
       </div>
       
       {/* Shortlist Overlay */}
-      <ShortlistOverlay isOpen={isShortlistOpen} onClose={() => setIsShortlistOpen(false)} />
+      <ShortlistOverlay 
+        isOpen={isShortlistOpen} 
+        onClose={() => setIsShortlistOpen(false)} 
+        initialTab={activeTab}
+      />
 
       {/* Main Content Rendered Here */}
       <div className="flex-1 overflow-y-auto pb-24 relative z-10">
