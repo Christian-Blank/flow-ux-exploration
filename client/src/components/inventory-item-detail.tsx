@@ -3,7 +3,7 @@ import {
   X, ChevronLeft, ChevronRight, Calendar, MapPin, Tag, 
   RefreshCcw, Gavel, Repeat, ArrowRightLeft, DollarSign, Recycle, 
   Camera, Edit3, Activity, FileText, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon,
-  Clock, Map, HelpCircle, ThumbsUp, ThumbsDown, Sparkles, Search, Layers
+  Clock, Map, HelpCircle, ThumbsUp, ThumbsDown, Sparkles, Search, Layers, Shirt, Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,15 @@ interface UsageEvent {
     imageUrl?: string;
 }
 
+interface CapsuleRecommendation {
+    id: string;
+    name: string;
+    situation: string;
+    reasoning: string;
+    matchScore: number;
+    items: { image: string; name: string }[];
+}
+
 // Mock extended data for prototype
 const MOCK_INITIAL_DATA = {
   purchaseDate: "Oct 12, 2025",
@@ -60,7 +69,31 @@ const MOCK_INITIAL_DATA = {
       { id: '1', date: 'Jan 15, 2026', type: 'worn', location: 'Gallery Opening, downtown', source: 'photo_ai', imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=150&q=60" },
       { id: '2', date: 'Dec 24, 2025', type: 'worn', location: 'Family Dinner', source: 'manual' },
       { id: '3', date: 'Nov 10, 2025', type: 'verified', location: 'Wardrobe Audit', source: 'check_in' }
-  ] as UsageEvent[]
+  ] as UsageEvent[],
+  capsules: [
+      {
+          id: '1',
+          name: 'Minimalist Downtown',
+          situation: 'Coffee / Creative Work',
+          reasoning: 'Pairs the structured denim with soft textures for a balanced, approachable look.',
+          matchScore: 98,
+          items: [
+              { name: 'White Tee', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=100&q=60' },
+              { name: 'Leather Boots', image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&w=100&q=60' }
+          ]
+      },
+      {
+          id: '2',
+          name: 'Evening Gallery',
+          situation: 'Social / Evening',
+          reasoning: 'Elevates the item with darker tones and sharper silhouettes.',
+          matchScore: 92,
+          items: [
+              { name: 'Black Blazer', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=100&q=60' },
+              { name: 'Derby Shoes', image: 'https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=100&q=60' }
+          ]
+      }
+  ] as CapsuleRecommendation[]
 };
 
 type Condition = 'mint' | 'good' | 'fair' | 'broken';
@@ -74,6 +107,7 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
   const [links, setLinks] = useState<ExternalLinkItem[]>(MOCK_INITIAL_DATA.links);
   const [usageHistory, setUsageHistory] = useState<UsageEvent[]>(MOCK_INITIAL_DATA.usageHistory);
   const [showStalePrompt, setShowStalePrompt] = useState(true); // Simulate "haven't seen in a while"
+  const [selectedCapsuleId, setSelectedCapsuleId] = useState<string | null>(null);
 
   const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
   const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
@@ -330,6 +364,80 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                             <option value="broken">💔 Broken</option>
                         </select>
                     </div>
+                </div>
+
+                {/* AI Capsules Section */}
+                <div className="space-y-3">
+                     <div className="flex items-center justify-between border-b border-border pb-2">
+                        <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                            <Shirt className="w-3 h-3" /> Smart Capsules
+                        </label>
+                        <Button variant="ghost" size="sm" className="h-6 gap-1 text-[10px]" onClick={() => alert("Launching Capsule Workflow seeded with this item...")}>
+                            <Sparkles className="w-3 h-3 text-primary" /> GENERATE NEW
+                        </Button>
+                     </div>
+                     <div className="space-y-3">
+                         {MOCK_INITIAL_DATA.capsules.map(capsule => (
+                             <div 
+                                key={capsule.id} 
+                                className={cn(
+                                    "p-3 rounded border transition-all cursor-pointer group",
+                                    selectedCapsuleId === capsule.id 
+                                        ? "bg-primary/5 border-primary shadow-sm" 
+                                        : "bg-muted/5 border-border hover:bg-muted/10 hover:border-primary/30"
+                                )}
+                                onClick={() => setSelectedCapsuleId(selectedCapsuleId === capsule.id ? null : capsule.id)}
+                             >
+                                 <div className="flex items-start justify-between mb-2">
+                                     <div>
+                                         <p className="font-bold text-sm">{capsule.name}</p>
+                                         <p className="text-[10px] text-muted-foreground font-mono uppercase">{capsule.situation}</p>
+                                     </div>
+                                     <Badge variant="secondary" className="text-[10px] font-mono bg-white border border-border">
+                                         {capsule.matchScore}% MATCH
+                                     </Badge>
+                                 </div>
+                                 
+                                 <div className="flex gap-2 mb-3">
+                                     {/* Main Item (Current) */}
+                                     <div className="w-10 h-10 rounded overflow-hidden border-2 border-primary/20 relative">
+                                         <img src={images[0]} className="w-full h-full object-cover" />
+                                     </div>
+                                     <div className="w-px bg-border mx-1" />
+                                     {/* Capsule Items */}
+                                     {capsule.items.map((item, i) => (
+                                         <div key={i} className="w-10 h-10 rounded overflow-hidden border border-border bg-white" title={item.name}>
+                                             <img src={item.image} className="w-full h-full object-cover" />
+                                         </div>
+                                     ))}
+                                     <div className="w-10 h-10 rounded border border-dashed border-border flex items-center justify-center bg-transparent text-muted-foreground text-[10px]">
+                                         +2
+                                     </div>
+                                 </div>
+                                 
+                                 <AnimatePresence>
+                                     {selectedCapsuleId === capsule.id && (
+                                         <motion.div 
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden"
+                                         >
+                                             <div className="pt-2 border-t border-border/50 text-xs text-muted-foreground">
+                                                 <div className="flex gap-2 items-start">
+                                                     <Info className="w-3 h-3 mt-0.5 shrink-0" />
+                                                     <p>{capsule.reasoning}</p>
+                                                 </div>
+                                                 <Button size="sm" className="w-full mt-3 h-7 text-xs bg-primary text-white" onClick={(e) => { e.stopPropagation(); alert(`Opening capsule: ${capsule.name}`); }}>
+                                                     VIEW FULL CAPSULE
+                                                 </Button>
+                                             </div>
+                                         </motion.div>
+                                     )}
+                                 </AnimatePresence>
+                             </div>
+                         ))}
+                     </div>
                 </div>
 
                 {/* Usage History Timeline */}
