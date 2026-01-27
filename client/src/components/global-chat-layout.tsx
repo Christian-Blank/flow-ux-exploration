@@ -53,8 +53,24 @@ export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
     return '';
   };
 
+  const getStepLabels = () => {
+    switch (location) {
+        case '/': 
+            return { next: "INITIALIZE_CONTEXT", back: "" };
+        case '/upload-context': 
+            return { next: "SCAN_INVENTORY", back: "REWIND_SCENARIO" };
+        case '/inventory-selection': 
+            return { next: "COMPILE_FEED", back: "UNDO_CONTEXT" };
+        case '/product-feed': 
+            return { next: "REFINE_RESULTS", back: "RESELECT_ASSETS" };
+        default: 
+            return { next: "CONTINUE", back: "BACK" };
+    }
+  };
+
   const currentStepId = getCurrentStep();
   const showWorkflowBar = currentStepId !== '';
+  const stepLabels = getStepLabels();
   
   // Handlers for Navigation
   const handleNext = () => {
