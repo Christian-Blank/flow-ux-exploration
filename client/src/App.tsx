@@ -9,6 +9,7 @@ import ContextUpload from "@/pages/context-upload";
 import InventorySelection from "@/pages/inventory-selection";
 import GlobalSearch from "@/pages/global-search";
 import MyInventory from "@/pages/my-inventory";
+import AvatarSelection from "@/pages/avatar-selection";
 import { GlobalChatLayout } from "@/components/global-chat-layout";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
         <Route path="/inventory-selection" component={InventorySelection} />
         <Route path="/global-search" component={GlobalSearch} />
         <Route path="/my-inventory" component={MyInventory} />
+        <Route path="/avatar-selection" component={AvatarSelection} />
         <Route component={NotFound} />
       </Switch>
     </GlobalChatLayout>

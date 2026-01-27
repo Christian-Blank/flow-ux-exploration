@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Upload, Link as LinkIcon, Search, Archive, Globe, Plus, ArrowRight, Shirt } from "lucide-react";
-import { motion } from "framer-motion";
+import { Upload, Link as LinkIcon, Search, Archive, Globe, Plus, ArrowRight, X, Shirt, ShoppingBag } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export default function InventorySelection() {
   const [, setLocation] = useLocation();
   const [uploads, setUploads] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Mock Inventory State - simulating items added from searches
+  const [inventory, setInventory] = useState([
+      { id: "1", name: "Acne Studios Jeans", brand: "Acne Studios", img: "https://images.unsplash.com/photo-1542272617-08f086303b9f?auto=format&fit=crop&w=300&q=80" },
+      { id: "2", name: "Uniqlo T-Shirt", brand: "Uniqlo", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=300&q=80" }
+  ]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -25,6 +30,10 @@ export default function InventorySelection() {
     setIsDragging(false);
     // Mock drop
     setUploads(prev => [...prev, "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"]);
+  };
+
+  const removeInventoryItem = (id: string) => {
+      setInventory(prev => prev.filter(item => item.id !== id));
   };
 
   return (
@@ -47,62 +56,10 @@ export default function InventorySelection() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
-            {/* Left Column: Direct Upload */}
-            <div className="space-y-8">
-                <div className="flex items-center gap-2 mb-4">
-                     <div className="w-2 h-2 bg-primary rounded-full" />
-                     <h3 className="font-display font-bold text-lg">DIRECT_UPLOAD</h3>
-                </div>
-
-                <div 
-                    className={cn(
-                        "relative group border-2 border-dashed h-80 flex flex-col items-center justify-center p-8 transition-all duration-300 chamfer-lg cursor-pointer bg-white",
-                        isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                    )}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                >
-                    <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary" />
-                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary" />
-                    
-                    <div className="bg-muted p-4 rounded-full mb-6 group-hover:scale-110 transition-transform">
-                        <Upload className="w-8 h-8 text-foreground" />
-                    </div>
-                    <h3 className="font-bold text-lg text-foreground mb-2">DROP_APPAREL_PHOTOS</h3>
-                    <p className="text-center text-sm text-muted-foreground font-mono max-w-xs mb-6">
-                        Upload detailed shots of specific items you want to include in the styling matrix.
-                    </p>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="font-mono text-xs">BROWSE_FILES</Button>
-                        <Button variant="ghost" size="sm" className="font-mono text-xs text-muted-foreground">PASTE_LINK</Button>
-                    </div>
-                </div>
-
-                {/* Uploaded Preview */}
-                {uploads.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2">
-                        {uploads.map((url, i) => (
-                            <div key={i} className="aspect-[3/4] bg-muted border border-border relative group overflow-hidden">
-                                <img src={url} className="w-full h-full object-cover" />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] font-mono p-1">
-                                    IMG_{i}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Right Column: Database Search Tools */}
-            <div className="space-y-8">
-                <div className="flex items-center gap-2 mb-4">
-                     <div className="w-2 h-2 bg-accent rounded-full" />
-                     <h3 className="font-display font-bold text-lg">DATABASE_RETRIEVAL</h3>
-                </div>
-
+            {/* Left Column: Input Methods */}
+            <div className="lg:col-span-7 space-y-8 order-2 lg:order-1">
                 <div className="grid gap-6">
                     {/* Search My Inventory */}
                     <motion.div 
@@ -151,29 +108,121 @@ export default function InventorySelection() {
                             </div>
                             <Search className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
-                        
-                        <div className="mt-6 flex gap-2">
-                             <span className="px-2 py-1 bg-muted border border-border text-[10px] font-mono text-muted-foreground">NIKE</span>
-                             <span className="px-2 py-1 bg-muted border border-border text-[10px] font-mono text-muted-foreground">ZARA</span>
-                             <span className="px-2 py-1 bg-muted border border-border text-[10px] font-mono text-muted-foreground">UNIQLO</span>
-                             <span className="px-2 py-1 bg-muted border border-border text-[10px] font-mono text-muted-foreground">+40k Brands</span>
-                        </div>
                     </motion.div>
                 </div>
-            </div>
-        </div>
 
-        {/* Continue Action */}
-        <div className="mt-16 border-t border-border pt-8 flex justify-end">
-            <Button 
-                className="w-full md:w-auto h-14 px-12 text-lg font-display tracking-wider bg-primary hover:bg-primary/90 rounded-none chamfer-sm relative overflow-hidden group"
-                onClick={() => console.log("Proceeding to matching...")}
-            >
-                <span className="relative z-10 flex items-center gap-2">
-                    COMPILE_ASSETS <ArrowRight className="w-5 h-5" />
-                </span>
-                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
-            </Button>
+                {/* Direct Upload Area */}
+                <div 
+                    className={cn(
+                        "relative group border-2 border-dashed h-48 flex flex-col items-center justify-center p-8 transition-all duration-300 chamfer-lg cursor-pointer bg-white",
+                        isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    )}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="bg-muted p-3 rounded-full group-hover:scale-110 transition-transform">
+                            <Upload className="w-6 h-6 text-foreground" />
+                        </div>
+                        <div className="text-left">
+                            <h3 className="font-bold text-sm text-foreground">DIRECT_UPLOAD</h3>
+                            <p className="text-xs text-muted-foreground font-mono">
+                                Drag photos of specific items here
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Column: Asset Manifest (Summary View) */}
+            <div className="lg:col-span-5 space-y-6 order-1 lg:order-2 lg:border-l border-border lg:pl-12">
+                <div className="flex items-center justify-between mb-2">
+                     <span className="text-sm font-bold font-display tracking-wide flex items-center gap-2">
+                        <ShoppingBag className="w-4 h-4 text-primary" />
+                        ASSET_MANIFEST ({inventory.length + uploads.length})
+                     </span>
+                </div>
+
+                <div className="bg-muted/10 border border-border chamfer-sm p-4 min-h-[400px] flex flex-col">
+                    <div className="flex-1 space-y-3 overflow-y-auto max-h-[500px] pr-2">
+                        <AnimatePresence>
+                            {/* Inventory Items */}
+                            {inventory.map((item) => (
+                                <motion.div
+                                    key={item.id}
+                                    layout
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className="bg-white p-3 border border-border shadow-sm flex items-center gap-4 group hover:border-primary/30 transition-colors"
+                                >
+                                    <div className="w-12 h-12 bg-muted overflow-hidden flex-shrink-0 border border-border">
+                                        <img src={item.img} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-mono text-muted-foreground uppercase">{item.brand}</p>
+                                        <p className="text-sm font-bold truncate">{item.name}</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => removeInventoryItem(item.id)}
+                                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm transition-colors"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </motion.div>
+                            ))}
+                            
+                            {/* Uploaded Items */}
+                            {uploads.map((url, i) => (
+                                <motion.div
+                                    key={`upload-${i}`}
+                                    layout
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className="bg-white p-3 border border-border shadow-sm flex items-center gap-4 group hover:border-primary/30 transition-colors"
+                                >
+                                    <div className="w-12 h-12 bg-muted overflow-hidden flex-shrink-0 border border-border">
+                                        <img src={url} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-mono text-muted-foreground uppercase">DIRECT_UPLOAD</p>
+                                        <p className="text-sm font-bold truncate">IMG_ASSET_{i+1}</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => setUploads(uploads.filter((_, idx) => idx !== i))}
+                                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm transition-colors"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </motion.div>
+                            ))}
+                            
+                            {inventory.length === 0 && uploads.length === 0 && (
+                                <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-12">
+                                    <Shirt className="w-12 h-12 text-muted-foreground mb-4" />
+                                    <p className="text-xs font-mono">NO ASSETS INDEXED</p>
+                                </div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Continue Button */}
+                    <div className="pt-6 border-t border-border mt-4">
+                        <Button 
+                            className="w-full h-12 text-md font-display tracking-wider bg-primary hover:bg-primary/90 rounded-none chamfer-sm relative overflow-hidden group"
+                            onClick={() => setLocation("/avatar-selection")}
+                            disabled={inventory.length === 0 && uploads.length === 0}
+                        >
+                            <span className="relative z-10 flex items-center gap-2">
+                                CONFIRM_MANIFEST <ArrowRight className="w-4 h-4" />
+                            </span>
+                            <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
   );
