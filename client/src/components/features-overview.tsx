@@ -26,6 +26,12 @@ const FEATURES = [
         description: "Your Shortlist and Shopping List are living entities. The system learns instantly from what you save, reject, or hesitate on, refining its understanding of your taste in real-time."
     },
     {
+        category: "Workflow",
+        icon: GitMerge,
+        title: "Adaptive Smart Workflows",
+        description: "The AI creates custom workflows on the fly. Whether you're in a specific scenario or need a unique process, it generates and adapts steps dynamically to fit exactly what you need right now."
+    },
+    {
         category: "Discovery",
         icon: Sparkles,
         title: "Contextual AI Shopping",
