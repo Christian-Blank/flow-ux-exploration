@@ -253,7 +253,7 @@ export default function ContextUpload() {
                      </p>
                     <Button 
                         className="w-full h-14 text-lg font-display tracking-wider bg-primary hover:bg-primary/90 rounded-none chamfer-sm relative overflow-hidden group"
-                        onClick={() => console.log("Confirming analysis...")}
+                        onClick={() => setLocation("/inventory-selection")}
                     >
                         <span className="relative z-10 flex items-center gap-2">
                             CONFIRM_AND_CONTINUE <ChevronRight className="w-5 h-5" />

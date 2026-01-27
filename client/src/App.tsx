@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import ScenarioPicker from "@/pages/scenario-picker";
 import ContextUpload from "@/pages/context-upload";
+import InventorySelection from "@/pages/inventory-selection";
+import GlobalSearch from "@/pages/global-search";
+import MyInventory from "@/pages/my-inventory";
 import { GlobalChatLayout } from "@/components/global-chat-layout";
 
 function Router() {
@@ -14,6 +17,9 @@ function Router() {
       <Switch>
         <Route path="/" component={ScenarioPicker} />
         <Route path="/upload-context" component={ContextUpload} />
+        <Route path="/inventory-selection" component={InventorySelection} />
+        <Route path="/global-search" component={GlobalSearch} />
+        <Route path="/my-inventory" component={MyInventory} />
         <Route component={NotFound} />
       </Switch>
     </GlobalChatLayout>
