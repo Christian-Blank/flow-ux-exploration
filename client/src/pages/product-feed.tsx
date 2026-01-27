@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Heart, X, Bookmark, ChevronLeft, ChevronRight, Info, Maximize2, Sparkles, Shirt, DollarSign, Activity, Star } from "lucide-react";
+import { Heart, X, Bookmark, ChevronLeft, ChevronRight, Info, Maximize2, Sparkles, Shirt, DollarSign, Activity, Star, Box } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { ProductStatus } from "./shortlist-overlay";
 
 // Reuse Product Interface
 interface Product {
@@ -11,7 +12,7 @@ interface Product {
   name: string;
   price: number;
   image: string;
-  status?: string; // Add status support
+  status: ProductStatus; 
   attributes: {
       formality: string;
       material: string;
@@ -25,7 +26,7 @@ interface ComparisonViewProps {
   onSwap: (oldId: string, newId: string) => void;
   onRemove: (id: string) => void;
   onBuy: (item: Product) => void;
-  onAdd?: (id: string) => void; // New prop for adding items
+  onAdd?: (id: string) => void; 
 }
 
 export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy, onAdd }: ComparisonViewProps) {
@@ -44,6 +45,27 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
 
   const isHidden = (id: string) => hiddenProductIds.includes(id);
 
+  // Helper for Status Colors (Shared Logic)
+  const getStatusColor = (status: ProductStatus) => {
+      switch (status) {
+          case 'bought': return "bg-amber-50 border-amber-200 ring-1 ring-amber-100";
+          case 'considering': return "bg-purple-50 border-purple-200 ring-1 ring-purple-100";
+          case 'problem': return "bg-stone-50 border-stone-200 ring-1 ring-stone-100 grayscale";
+          case 'owned': return "bg-cyan-50 border-cyan-200 ring-1 ring-cyan-100";
+          default: return "bg-white border-border";
+      }
+  };
+
+  const getStatusBadgeColor = (status: ProductStatus) => {
+      switch (status) {
+          case 'bought': return "text-amber-700 bg-amber-100 border-amber-200";
+          case 'considering': return "text-purple-700 bg-purple-100 border-purple-200";
+          case 'problem': return "text-stone-600 bg-stone-100 border-stone-200";
+          case 'owned': return "text-cyan-700 bg-cyan-100 border-cyan-200";
+          default: return "text-muted-foreground bg-muted border-border";
+      }
+  };
+
   return (
     <div className="h-full flex flex-col bg-white rounded-md border border-border overflow-hidden shadow-sm">
         {/* Scrollable Content Container */}
@@ -54,6 +76,7 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                 <div className="flex border-b border-border divide-x divide-border">
                     {displaySlots.map((product, idx) => {
                         const productHidden = product && isHidden(product.id);
+                        const statusStyle = product ? getStatusColor(product.status) : "";
                         
                         return (
                         <motion.div 
@@ -65,9 +88,7 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                             className={cn(
                                 "relative group overflow-hidden transition-all",
                                 productHidden ? "bg-muted/10" : "flex-1",
-                                // Highlight Bought/Considering items in matrix too
-                                product && product.status === 'bought' && "bg-amber-50/30",
-                                product && product.status === 'considering' && "bg-purple-50/30"
+                                !productHidden && statusStyle // Apply tint to the whole column header background if status matches
                             )}
                         >
                             {product ? (
@@ -93,6 +114,16 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                                         <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                                             <img src={product.image} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                                             
+                                            {/* Status Badge (Top Left) */}
+                                            {product.status !== 'shortlisted' && (
+                                                <div className={cn(
+                                                    "absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-sm border shadow-sm z-10",
+                                                    getStatusBadgeColor(product.status)
+                                                )}>
+                                                    {product.status}
+                                                </div>
+                                            )}
+
                                             {/* Overlay Controls - Always Visible */}
                                             <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
                                                 <button 
@@ -118,7 +149,7 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="p-4 bg-muted/5 border-t border-border/50">
+                                        <div className={cn("p-4 border-t border-border/50", statusStyle)}>
                                             <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{product.brand}</p>
                                             <h3 className="font-bold text-sm leading-tight mt-1 h-10 line-clamp-2">{product.name}</h3>
                                             <div className="mt-2 flex items-center justify-between">
@@ -265,6 +296,9 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                     <div key={attr} className="flex divide-x divide-border border-t border-border">
                         {displaySlots.map((product, idx) => {
                             const productHidden = product && isHidden(product.id);
+                            // Also apply status tint to rows for consistency
+                            const statusStyle = product ? getStatusColor(product.status) : "";
+                            
                             return (
                                 <motion.div 
                                     layout
@@ -273,7 +307,8 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                                     key={product ? `${attr}-${product.id}` : `empty-${attr}-${idx}`} 
                                     className={cn(
                                         "min-w-0 transition-colors group",
-                                        productHidden ? "bg-muted/10 p-0" : "flex-1 p-3 hover:bg-muted/5"
+                                        productHidden ? "bg-muted/10 p-0" : "flex-1 p-3",
+                                        !productHidden && statusStyle
                                     )}
                                 >
                                     {product && !productHidden && (
