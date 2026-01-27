@@ -127,7 +127,7 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="relative w-full md:w-[600px] lg:w-[800px] bg-background border-l border-border shadow-2xl h-full flex flex-col"
+                className="relative w-full bg-background border-l border-border shadow-2xl h-full flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header with Tabs */}
