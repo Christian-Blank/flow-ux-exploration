@@ -3,7 +3,7 @@ import {
   X, ChevronLeft, ChevronRight, Calendar, MapPin, Tag, 
   RefreshCcw, Gavel, Repeat, ArrowRightLeft, DollarSign, Recycle, 
   Camera, Edit3, Activity, FileText, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon,
-  Clock, Map, HelpCircle, ThumbsUp, ThumbsDown
+  Clock, Map, HelpCircle, ThumbsUp, ThumbsDown, Sparkles, Search, Layers
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -160,6 +160,25 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
       <Icon className="w-6 h-6 mb-1 group-hover:scale-110 transition-transform" />
       <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>
     </Button>
+  );
+  
+  const DiscoveryButton = ({ icon: Icon, title, description, colorClass, onClick }: any) => (
+      <Button 
+        variant="outline"
+        className={cn("h-auto py-4 px-4 flex items-center justify-between w-full border-2 hover:border-solid transition-all group", colorClass)}
+        onClick={onClick}
+      >
+        <div className="flex items-center gap-3">
+             <div className={cn("p-2 rounded-full bg-muted/50 group-hover:bg-white/50 transition-colors", colorClass.replace('hover:border-', 'text-'))}>
+                 <Icon className="w-5 h-5" />
+             </div>
+             <div className="text-left">
+                 <p className="font-bold text-sm leading-none mb-1">{title}</p>
+                 <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wide">{description}</p>
+             </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+      </Button>
   );
 
   return (
@@ -354,42 +373,6 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                      </div>
                 </div>
 
-                {/* Digital Artifacts Section */}
-                <div className="space-y-3">
-                     <div className="flex items-center justify-between border-b border-border pb-2">
-                        <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
-                            <FileText className="w-3 h-3" /> Digital Artifacts
-                        </label>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={addMockArtifact}>
-                            <Plus className="w-4 h-4 text-primary" />
-                        </Button>
-                     </div>
-                     <div className="space-y-2">
-                         {artifacts.length === 0 && <p className="text-xs text-muted-foreground italic">No artifacts uploaded.</p>}
-                         {artifacts.map(artifact => (
-                             <div key={artifact.id} className="flex items-center justify-between p-2 bg-muted/5 border border-border rounded hover:border-primary/50 transition-colors group">
-                                 <div className="flex items-center gap-3">
-                                     <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded flex items-center justify-center">
-                                         <FileText className="w-4 h-4" />
-                                     </div>
-                                     <div>
-                                         <p className="text-xs font-bold">{artifact.label}</p>
-                                         <p className="text-[10px] text-muted-foreground font-mono">{artifact.date} • {artifact.type.toUpperCase()}</p>
-                                     </div>
-                                 </div>
-                                 <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
-                                    onClick={() => deleteArtifact(artifact.id)}
-                                >
-                                     <Trash2 className="w-3 h-3" />
-                                 </Button>
-                             </div>
-                         ))}
-                     </div>
-                </div>
-
                 {/* Notes Section */}
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
@@ -401,6 +384,31 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                         className="bg-muted/5 border-border focus:border-primary min-h-[80px] text-sm resize-none"
                         placeholder="Add details about fit, memories, or defects..."
                     />
+                </div>
+                
+                {/* AI Discovery & Exploration */}
+                <div className="space-y-3">
+                     <div className="flex items-center justify-between border-b border-border pb-2">
+                        <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                            <Sparkles className="w-3 h-3" /> Discovery & Styling
+                        </label>
+                     </div>
+                     <div className="grid grid-cols-2 gap-3">
+                         <DiscoveryButton 
+                            icon={Layers}
+                            title="Find Compliments"
+                            description="Browse matching items"
+                            colorClass="hover:border-purple-500 hover:bg-purple-50 text-purple-600"
+                            onClick={() => alert("Opening Discovery Feed with 'Complimentary' filter...")}
+                         />
+                         <DiscoveryButton 
+                            icon={Search}
+                            title="Expand Collection"
+                            description="Find similar items"
+                            colorClass="hover:border-blue-500 hover:bg-blue-50 text-blue-600"
+                            onClick={() => alert("Opening Discovery Feed with 'Similar' filter...")}
+                         />
+                     </div>
                 </div>
 
                  {/* Linked Resources Section */}
