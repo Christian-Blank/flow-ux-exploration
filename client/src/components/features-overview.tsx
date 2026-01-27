@@ -20,10 +20,22 @@ const FEATURES = [
         description: "Shopping that understands 'where' and 'why', not just 'what'. Filters by social context, formality, and mood."
     },
     {
+        category: "Visual Learning",
+        icon: Camera,
+        title: "Smart Context Extraction",
+        description: "Upload photos of yourself, scenes, or items instead of typing. The system analyzes visual cues to understand your style, environment, and needs automatically."
+    },
+    {
+        category: "Interaction",
+        icon: GitMerge,
+        title: "Adaptive Conversation",
+        description: "The AI learns from every interaction. Chat naturally to refine recommendations, nerd out on details, or confirm choices. It asks clarifying questions only when necessary."
+    },
+    {
         category: "Analysis",
         icon: GitMerge,
         title: "Transparent Reasoning",
-        description: "Clickable deduction graphs show exactly why an item was recommended, citing style rules and user preferences."
+        description: "Clickable deduction graphs show exactly why an item was recommended, citing style rules, visual analysis, and your unique preferences."
     },
     {
         category: "Inventory",
@@ -35,13 +47,13 @@ const FEATURES = [
         category: "Styling",
         icon: Shirt,
         title: "Smart Capsule Engine",
-        description: "Generate entire outfits around a single item. AI suggests situations and explains the styling logic."
+        description: "Generate entire outfits around a single item. AI suggests situations and explains the styling logic based on your owned items."
     },
     {
         category: "Lifestyle",
         icon: History,
         title: "Usage Lifecycle Tracking",
-        description: "Log when items are worn. Get 'Stale Item' prompts to help declutter or rediscover forgotten pieces."
+        description: "Log when items are worn via photo uploads or manual entry. Get 'Stale Item' prompts to help declutter or rediscover forgotten pieces."
     },
     {
         category: "Management",
@@ -50,18 +62,6 @@ const FEATURES = [
         description: "Integrated workflows for repair, resale, donation, and recycling directly from the item view."
     },
     {
-        category: "Visuals",
-        icon: Camera,
-        title: "Smart Visual Context",
-        description: "Upload photos to automatically log usage. AI detects items in your photos to keep inventory up to date."
-    },
-    {
-        category: "Decision",
-        icon: GitMerge,
-        title: "Comparison Matrix",
-        description: "Side-by-side technical comparison of potential purchases against each other and your existing inventory."
-    },
-     {
         category: "Architecture",
         icon: ShieldCheck,
         title: "Privacy-First Design",
