@@ -15,45 +15,94 @@ export default function ContextUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState<string | null>(null);
 
-  // Mock Analysis Data
+  // Mock Analysis Data with Artifacts
   const analysisData = {
     environment: {
       title: "Work Environment",
       value: "Modern Open Office",
       confidence: 92,
-      reasoning: [
-        { id: "1", description: "Glass walls and open floor plan detected in 'workspace.jpg'.", confidence: 95 },
-        { id: "2", description: "Natural lighting levels suggest high-exposure environment.", confidence: 88 },
-        { id: "3", description: "Minimalist furniture aligns with 'Tech/Startup' aesthetic.", confidence: 92 },
-      ],
       sources: [
         { id: "s1", type: "image" as const, label: "Workspace Photo", thumbnail: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=60" },
         { id: "s2", type: "link" as const, label: "Company Page" },
-      ]
+      ],
+      reasoning: [
+        { 
+            id: "1", 
+            description: "Glass walls and open floor plan detected in 'workspace.jpg'.", 
+            confidence: 95,
+            artifacts: [
+                { id: "a1", type: "image" as const, label: "Source Image: workspace.jpg", url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }
+            ]
+        },
+        { 
+            id: "2", 
+            description: "Natural lighting levels suggest high-exposure environment.", 
+            confidence: 88,
+             artifacts: [
+                { id: "a1", type: "image" as const, label: "Source Image: workspace.jpg", url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }
+            ]
+        },
+        { 
+            id: "3", 
+            description: "Minimalist furniture aligns with 'Tech/Startup' aesthetic.", 
+            confidence: 92,
+             artifacts: [
+                { id: "a2", type: "link" as const, label: "Reference: Office Trends 2024", url: "https://archdaily.com/trends" }
+            ]
+        },
+      ],
     },
     style: {
       title: "Current Style",
       value: "Smart Casual / Tech",
       confidence: 85,
-      reasoning: [
-        { id: "1", description: "Subject wearing unmarked t-shirt and blazer combo.", confidence: 90 },
-        { id: "2", description: "Sneakers identified as Common Projects Achilles.", confidence: 85 },
-      ],
       sources: [
         { id: "s3", type: "image" as const, label: "Profile Pic", thumbnail: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=60" },
-      ]
+      ],
+      reasoning: [
+        { 
+            id: "1", 
+            description: "Subject wearing unmarked t-shirt and blazer combo.", 
+            confidence: 90,
+             artifacts: [
+                { id: "a3", type: "image" as const, label: "Detected Outfit", url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }
+            ]
+        },
+        { 
+            id: "2", 
+            description: "Sneakers identified as Common Projects Achilles.", 
+            confidence: 85,
+             artifacts: [
+                { id: "a4", type: "image" as const, label: "Product Match", url: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }
+            ]
+        },
+      ],
     },
     role: {
       title: "Professional Role",
       value: "Creative Director",
       confidence: 78,
-      reasoning: [
-        { id: "1", description: "Inferred from LinkedIn title provided in external links.", confidence: 99 },
-        { id: "2", description: "Workspace setup includes drawing tablet and dual monitors.", confidence: 75 },
-      ],
       sources: [
         { id: "s4", type: "link" as const, label: "LinkedIn" },
-      ]
+      ],
+      reasoning: [
+        { 
+            id: "1", 
+            description: "Inferred from LinkedIn title provided in external links.", 
+            confidence: 99,
+             artifacts: [
+                { id: "a5", type: "link" as const, label: "Extracted Title", url: "linkedin.com/in/user" }
+            ]
+        },
+        { 
+            id: "2", 
+            description: "Workspace setup includes drawing tablet and dual monitors.", 
+            confidence: 75,
+             artifacts: [
+                { id: "a6", type: "image" as const, label: "Desk Setup Analysis", url: "https://images.unsplash.com/photo-1593642532400-2682810df593?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }
+            ]
+        },
+      ],
     }
   };
 
