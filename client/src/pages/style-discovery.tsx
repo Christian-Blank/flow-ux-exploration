@@ -188,7 +188,7 @@ export default function StyleDiscovery() {
                         <Button 
                             size="sm" 
                             className="bg-white text-primary hover:bg-white/90 rounded-full h-10 px-6 text-xs font-bold tracking-wide shadow-md"
-                            onClick={() => console.log("Finalizing preferences...")}
+                            onClick={() => setLocation("/product-feed")}
                         >
                             FINALIZE_STYLE_PROFILE <ArrowRight className="w-3 h-3 ml-2" />
                         </Button>
