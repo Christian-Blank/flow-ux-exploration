@@ -10,6 +10,7 @@ import InventorySelection from "@/pages/inventory-selection";
 import GlobalSearch from "@/pages/global-search";
 import MyInventory from "@/pages/my-inventory";
 import AvatarSelection from "@/pages/avatar-selection";
+import StyleDiscovery from "@/pages/style-discovery";
 import { GlobalChatLayout } from "@/components/global-chat-layout";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
         <Route path="/global-search" component={GlobalSearch} />
         <Route path="/my-inventory" component={MyInventory} />
         <Route path="/avatar-selection" component={AvatarSelection} />
+        <Route path="/style-discovery" component={StyleDiscovery} />
         <Route component={NotFound} />
       </Switch>
     </GlobalChatLayout>

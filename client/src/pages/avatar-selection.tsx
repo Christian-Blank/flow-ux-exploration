@@ -209,7 +209,7 @@ export default function AvatarSelection() {
        <div className="mt-8 flex justify-end">
             <Button 
                 className="w-full md:w-auto h-14 px-12 text-lg font-display tracking-wider bg-primary hover:bg-primary/90 rounded-none chamfer-sm relative overflow-hidden group"
-                onClick={() => console.log("Generating look...")}
+                onClick={() => setLocation("/style-discovery")}
                 disabled={Object.keys(selections).filter(k => selections[k]).length === 0}
             >
                 <span className="relative z-10 flex items-center gap-2">
