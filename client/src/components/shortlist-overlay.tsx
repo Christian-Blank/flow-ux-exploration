@@ -124,7 +124,7 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
                     {isComparing ? (
                          <div className="h-full min-h-[600px] p-6">
                              <ComparisonView 
-                                products={shortlist.filter(p => selectedForCompare.includes(p.id))}
+                                products={selectedForCompare.map(id => shortlist.find(p => p.id === id)!).filter(Boolean)}
                                 allShortlist={shortlist}
                                 onSwap={(oldId: string, newId: string) => {
                                     setSelectedForCompare(prev => prev.map(id => id === oldId ? newId : id));

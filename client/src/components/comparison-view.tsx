@@ -89,25 +89,25 @@ export function ComparisonView({ products, allShortlist, onSwap, onRemove, onBuy
                                         <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                                             <img src={product.image} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                                             
-                                            {/* Overlay Controls */}
+                                            {/* Overlay Controls - Always Visible */}
                                             <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
                                                 <button 
                                                     onClick={() => toggleHide(product.id)}
-                                                    className="p-1.5 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                                                    className="p-1.5 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-muted-foreground hover:text-primary transition-colors border border-border/50"
                                                     title="Hide Column"
                                                 >
                                                     <EyeOff className="w-3.5 h-3.5" />
                                                 </button>
                                                 <button 
                                                     onClick={() => setSwappingSlotId(product.id)}
-                                                    className="p-1.5 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                                                    className="p-1.5 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-muted-foreground hover:text-primary transition-colors border border-border/50"
                                                     title="Swap Item"
                                                 >
                                                     <ArrowRightLeft className="w-3.5 h-3.5" />
                                                 </button>
                                                 <button 
                                                     onClick={() => onRemove(product.id)}
-                                                    className="p-1.5 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                                                    className="p-1.5 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-muted-foreground hover:text-destructive transition-colors border border-border/50"
                                                     title="Remove from Compare"
                                                 >
                                                     <X className="w-3.5 h-3.5" />
