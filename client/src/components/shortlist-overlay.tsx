@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, ShoppingBag, ArrowRight, Trash2, Bookmark, Check, ExternalLink, RefreshCw, AlertCircle, Box, Archive } from "lucide-react";
+import { X, ShoppingBag, ArrowRight, Trash2, Bookmark, Check, ExternalLink, RefreshCw, AlertCircle, Box, Archive, Shirt, Sparkles, PlusCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,10 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
   const [activeTab, setActiveTab] = useState<'shortlist' | 'inventory'>('shortlist');
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<Product | null>(null);
   const [viewingCapsule, setViewingCapsule] = useState<CapsuleData | null>(null);
+  
+  // New State for Multi-Selection Capsule Seeding
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedForCapsule, setSelectedForCapsule] = useState<string[]>([]);
 
   // Sync tab with props
   useEffect(() => {
@@ -54,6 +58,8 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
         setActiveTab(initialTab);
         setSelectedInventoryItem(null); // Reset detail view when opening fresh
         setViewingCapsule(null);
+        setIsSelectionMode(false);
+        setSelectedForCapsule([]);
     }
   }, [isOpen, initialTab]);
 
@@ -67,9 +73,18 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
     }
   };
 
+  const toggleCapsuleSelect = (id: string) => {
+      if (selectedForCapsule.includes(id)) {
+          setSelectedForCapsule(prev => prev.filter(i => i !== id));
+      } else {
+          setSelectedForCapsule(prev => [...prev, id]);
+      }
+  };
+
   const removeItem = (id: string) => {
       setShortlist(prev => prev.filter(i => i.id !== id));
       setSelectedForCompare(prev => prev.filter(i => i !== id));
+      setSelectedForCapsule(prev => prev.filter(i => i !== id));
   };
 
   const updateStatus = (id: string, status: ProductStatus) => {
@@ -113,6 +128,15 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
           return item.status !== 'owned';
       }
   });
+
+  const handleSelectionModeToggle = () => {
+      if (isSelectionMode) {
+          setIsSelectionMode(false);
+          setSelectedForCapsule([]);
+      } else {
+          setIsSelectionMode(true);
+      }
+  };
 
   return (
     <AnimatePresence>
@@ -164,15 +188,37 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
                                  {activeTab === 'inventory' && <motion.div layoutId="activeTab" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-cyan-600" />}
                              </button>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-[10px] font-mono rounded-sm">
-                                {displayedItems.length} ITEMS
-                            </span>
-                            <p className="text-xs font-mono text-muted-foreground">
-                                {isComparing 
-                                    ? "Analyzing 3-way vector compatibilities" 
-                                    : activeTab === 'shortlist' ? "Select items to compare nuances" : "Digital twin assets you own"}
-                            </p>
+                        <div className="flex items-center justify-between mr-4">
+                            <div className="flex items-center gap-3">
+                                <span className="px-2 py-1 bg-muted text-muted-foreground text-[10px] font-mono rounded-sm">
+                                    {displayedItems.length} ITEMS
+                                </span>
+                                <p className="text-xs font-mono text-muted-foreground">
+                                    {isComparing 
+                                        ? "Analyzing 3-way vector compatibilities" 
+                                        : activeTab === 'shortlist' ? "Select items to compare nuances" : "Digital twin assets you own"}
+                                </p>
+                            </div>
+
+                            {/* Selection Toggle for Inventory */}
+                            {activeTab === 'inventory' && !selectedInventoryItem && !viewingCapsule && (
+                                <Button 
+                                    variant={isSelectionMode ? "secondary" : "ghost"} 
+                                    size="sm" 
+                                    className={cn("h-7 text-xs gap-2", isSelectionMode && "bg-cyan-100 text-cyan-800 hover:bg-cyan-200")}
+                                    onClick={handleSelectionModeToggle}
+                                >
+                                    {isSelectionMode ? (
+                                        <>
+                                            <X className="w-3 h-3" /> CANCEL SELECTION
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check className="w-3 h-3" /> SELECT ITEMS
+                                        </>
+                                    )}
+                                </Button>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -224,9 +270,14 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
                              />
                          </div>
                     ) : (
-                        <div className="p-6 grid grid-cols-2 gap-4">
+                        <div className="p-6 grid grid-cols-2 gap-4 pb-24"> 
+                            {/* pb-24 for footer clearance */}
                             {displayedItems.map((item) => {
-                                const isSelected = selectedForCompare.includes(item.id);
+                                const isSelectedCompare = selectedForCompare.includes(item.id);
+                                const isSelectedCapsule = selectedForCapsule.includes(item.id);
+                                
+                                const isSelected = activeTab === 'shortlist' ? isSelectedCompare : isSelectedCapsule;
+                                
                                 return (
                                     <motion.div 
                                         layout
@@ -234,16 +285,22 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
                                         onClick={() => {
                                             if (activeTab === 'shortlist') {
                                                 toggleCompareSelect(item.id);
-                                            } else {
-                                                setSelectedInventoryItem(item);
+                                            } else if (activeTab === 'inventory') {
+                                                if (isSelectionMode) {
+                                                    toggleCapsuleSelect(item.id);
+                                                } else {
+                                                    setSelectedInventoryItem(item);
+                                                }
                                             }
                                         }}
                                         className={cn(
                                             "border transition-all duration-300 relative group overflow-hidden chamfer-sm",
-                                            "cursor-pointer", // Always cursor pointer now
+                                            "cursor-pointer",
                                             isSelected 
                                                 ? "border-primary ring-2 ring-primary shadow-[0_0_20px_rgba(59,130,246,0.15)] scale-[1.02] z-10" 
-                                                : cn(getStatusColor(item.status), "hover:shadow-md")
+                                                : cn(getStatusColor(item.status), "hover:shadow-md"),
+                                            // Dim non-selected items in selection mode
+                                            (isSelectionMode && !isSelected) && "opacity-60 grayscale-[0.5]"
                                         )}
                                     >
                                         <div className="aspect-[4/3] relative">
@@ -276,7 +333,7 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
                                                 )}
                                             </AnimatePresence>
 
-                                            {/* Actions Overlay */}
+                                            {/* Actions Overlay - Only show in shortlist mode or non-selection inventory mode */}
                                             {activeTab === 'shortlist' && (
                                                 <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-center" onClick={(e) => e.stopPropagation()}>
                                                     <button 
@@ -309,23 +366,53 @@ export function ShortlistOverlay({ isOpen, onClose, initialTab = 'shortlist' }: 
                     )}
                 </div>
 
-                {/* Footer Action Bar */}
-                {activeTab === 'shortlist' && !isComparing && (
-                    <div className="p-6 border-t border-border bg-white">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-mono text-muted-foreground">
-                                {selectedForCompare.length}/3 SELECTED FOR COMPARISON
-                            </span>
-                            <Button 
-                                disabled={selectedForCompare.length < 2}
-                                onClick={() => setIsComparing(true)}
-                                className="rounded-none chamfer-sm font-bold bg-primary hover:bg-primary/90"
-                            >
-                                RUN_COMPARISON_MATRIX <ArrowRight className="w-4 h-4 ml-2" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                {/* Footer Action Bar - Dynamic based on Tab */}
+                <AnimatePresence>
+                    {/* Shortlist Comparison Footer */}
+                    {activeTab === 'shortlist' && !isComparing && selectedForCompare.length > 0 && (
+                        <motion.div 
+                            initial={{ y: "100%" }}
+                            animate={{ y: 0 }}
+                            exit={{ y: "100%" }}
+                            className="p-6 border-t border-border bg-white absolute bottom-0 left-0 right-0 z-20"
+                        >
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-mono text-muted-foreground">
+                                    {selectedForCompare.length}/3 SELECTED FOR COMPARISON
+                                </span>
+                                <Button 
+                                    disabled={selectedForCompare.length < 2}
+                                    onClick={() => setIsComparing(true)}
+                                    className="rounded-none chamfer-sm font-bold bg-primary hover:bg-primary/90"
+                                >
+                                    RUN_COMPARISON_MATRIX <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Inventory Capsule Footer */}
+                    {activeTab === 'inventory' && isSelectionMode && selectedForCapsule.length > 0 && (
+                        <motion.div 
+                            initial={{ y: "100%" }}
+                            animate={{ y: 0 }}
+                            exit={{ y: "100%" }}
+                            className="p-6 border-t border-border bg-white absolute bottom-0 left-0 right-0 z-20"
+                        >
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-mono text-muted-foreground">
+                                    {selectedForCapsule.length} ITEMS SELECTED
+                                </span>
+                                <Button 
+                                    onClick={() => alert(`Creating capsule with ${selectedForCapsule.length} items... This would launch the capsule generation workflow.`)}
+                                    className="rounded-none chamfer-sm font-bold bg-purple-600 hover:bg-purple-700 text-white"
+                                >
+                                    <Sparkles className="w-4 h-4 mr-2" /> CREATE CAPSULE
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 
                 {/* Post-Purchase Modal (Overlay on Drawer) */}
                 <AnimatePresence>
