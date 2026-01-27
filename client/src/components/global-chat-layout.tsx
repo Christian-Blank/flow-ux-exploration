@@ -8,11 +8,23 @@ import { cn } from "@/lib/utils";
 import { useLocation, Link } from "wouter";
 import { ShortlistOverlay } from "@/components/shortlist-overlay";
 import { FeaturesOverview } from "@/components/features-overview";
+import { WorkflowProgress, WorkflowStep } from "@/components/workflow-progress";
 
 interface Message {
   role: "user" | "ai";
   content: string;
 }
+
+// Workflow Logic Map
+const WORKFLOW_STEPS: Record<string, WorkflowStep[]> = {
+  default: [
+    { id: 'scenario', label: 'SCENARIO', path: '/', status: 'pending' },
+    { id: 'context', label: 'CONTEXT', path: '/upload-context', status: 'pending' },
+    { id: 'inventory', label: 'INVENTORY', path: '/inventory-selection', status: 'pending' },
+    { id: 'discovery', label: 'DISCOVERY', path: '/product-feed', status: 'pending' },
+    { id: 'refinement', label: 'REFINEMENT', path: '', status: 'calculated' }, // AI Calculated step
+  ]
+};
 
 export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
   const [input, setInput] = useState("");
@@ -28,9 +40,34 @@ export function GlobalChatLayout({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState<'shortlist' | 'inventory'>('shortlist');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+
+  // Workflow State
+  const getCurrentStep = () => {
+    if (location === '/') return 'scenario';
+    if (location === '/upload-context') return 'context';
+    if (location === '/inventory-selection') return 'inventory';
+    if (location === '/product-feed') return 'discovery';
+    return '';
+  };
+
+  const currentStepId = getCurrentStep();
+  const showWorkflowBar = currentStepId !== '';
+  
+  // Handlers for Navigation
+  const handleNext = () => {
+    if (location === '/') setLocation('/upload-context');
+    else if (location === '/upload-context') setLocation('/inventory-selection');
+    else if (location === '/inventory-selection') setLocation('/product-feed');
+  };
+
+  const handleBack = () => {
+    if (location === '/upload-context') setLocation('/');
+    else if (location === '/inventory-selection') setLocation('/upload-context');
+    else if (location === '/product-feed') setLocation('/inventory-selection');
+  };
 
   const openShortlist = (tab: 'shortlist' | 'inventory') => {
       setActiveTab(tab);
