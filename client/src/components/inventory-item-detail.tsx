@@ -2,7 +2,8 @@ import { useState } from "react";
 import { 
   X, ChevronLeft, ChevronRight, Calendar, MapPin, Tag, 
   RefreshCcw, Gavel, Repeat, ArrowRightLeft, DollarSign, Recycle, 
-  Camera, Edit3, Activity, FileText, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon
+  Camera, Edit3, Activity, FileText, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon,
+  Clock, Map, HelpCircle, ThumbsUp, ThumbsDown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,15 @@ interface ExternalLinkItem {
     url: string;
 }
 
+interface UsageEvent {
+    id: string;
+    date: string;
+    type: 'worn' | 'placed' | 'verified';
+    location: string;
+    source: 'photo_ai' | 'manual' | 'check_in';
+    imageUrl?: string;
+}
+
 // Mock extended data for prototype
 const MOCK_INITIAL_DATA = {
   purchaseDate: "Oct 12, 2025",
@@ -45,7 +55,12 @@ const MOCK_INITIAL_DATA = {
   links: [
       { id: '1', title: 'Care & Washing Guide', url: '#' },
       { id: '2', title: 'Styling Inspiration Board', url: '#' }
-  ] as ExternalLinkItem[]
+  ] as ExternalLinkItem[],
+  usageHistory: [
+      { id: '1', date: 'Jan 15, 2026', type: 'worn', location: 'Gallery Opening, downtown', source: 'photo_ai', imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=150&q=60" },
+      { id: '2', date: 'Dec 24, 2025', type: 'worn', location: 'Family Dinner', source: 'manual' },
+      { id: '3', date: 'Nov 10, 2025', type: 'verified', location: 'Wardrobe Audit', source: 'check_in' }
+  ] as UsageEvent[]
 };
 
 type Condition = 'mint' | 'good' | 'fair' | 'broken';
@@ -57,6 +72,8 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
   const [notes, setNotes] = useState("Really love the fit of this. Wore it to the gallery opening last week.");
   const [artifacts, setArtifacts] = useState<Artifact[]>(MOCK_INITIAL_DATA.artifacts);
   const [links, setLinks] = useState<ExternalLinkItem[]>(MOCK_INITIAL_DATA.links);
+  const [usageHistory, setUsageHistory] = useState<UsageEvent[]>(MOCK_INITIAL_DATA.usageHistory);
+  const [showStalePrompt, setShowStalePrompt] = useState(true); // Simulate "haven't seen in a while"
 
   const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
   const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
@@ -102,6 +119,36 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
           url: '#' 
       };
       setLinks([...links, newLink]);
+  };
+  
+  const addUsageLog = () => {
+      const newEvent: UsageEvent = {
+          id: Date.now().toString(),
+          date: 'Today',
+          type: 'worn',
+          location: 'Office',
+          source: 'manual'
+      };
+      setUsageHistory([newEvent, ...usageHistory]);
+  };
+  
+  const handleStaleConfirm = (stillHave: boolean) => {
+      if (stillHave) {
+          const newEvent: UsageEvent = {
+              id: Date.now().toString(),
+              date: 'Today',
+              type: 'verified',
+              location: 'Confirmed by User',
+              source: 'check_in'
+          };
+          setUsageHistory([newEvent, ...usageHistory]);
+          setShowStalePrompt(false);
+          // Ideally trigger condition update prompt next
+      } else {
+          // Trigger dispose flow
+          alert("Opening disposal options...");
+          setShowStalePrompt(false);
+      }
   };
 
   const ActionButton = ({ icon: Icon, label, colorClass, onClick }: any) => (
@@ -197,6 +244,34 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
             {/* Right: Data & Management */}
             <div className="p-6 space-y-8 bg-white">
                 
+                {/* Stale Check-in Prompt */}
+                <AnimatePresence>
+                    {showStalePrompt && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="bg-amber-50 border border-amber-200 rounded p-4 mb-4"
+                        >
+                            <div className="flex items-start gap-3">
+                                <HelpCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-sm text-amber-900">Long time no see!</h4>
+                                    <p className="text-xs text-amber-800 mt-1 mb-3">We haven't seen this item in any recent photos. Do you still own it?</p>
+                                    <div className="flex gap-2">
+                                        <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white" onClick={() => handleStaleConfirm(true)}>
+                                            Yes, still have it
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="h-7 text-xs border-amber-300 text-amber-900 hover:bg-amber-100" onClick={() => handleStaleConfirm(false)}>
+                                            No, it's gone
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                
                 {/* Meta Data Grid */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 bg-muted/5 rounded border border-border">
@@ -236,6 +311,47 @@ export function InventoryItemDetail({ product, onBack }: InventoryItemDetailProp
                             <option value="broken">💔 Broken</option>
                         </select>
                     </div>
+                </div>
+
+                {/* Usage History Timeline */}
+                <div className="space-y-3">
+                     <div className="flex items-center justify-between border-b border-border pb-2">
+                        <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                            <Clock className="w-3 h-3" /> Usage History
+                        </label>
+                        <Button variant="ghost" size="sm" className="h-6 gap-1 text-[10px]" onClick={addUsageLog}>
+                            <Plus className="w-3 h-3" /> LOG USE
+                        </Button>
+                     </div>
+                     <div className="relative pl-4 border-l border-border space-y-4">
+                         {usageHistory.map(event => (
+                             <div key={event.id} className="relative">
+                                 <div className={cn(
+                                     "absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white shadow-sm",
+                                     event.type === 'worn' ? "bg-primary" : "bg-muted-foreground"
+                                 )} />
+                                 <div className="flex items-start justify-between gap-4">
+                                     <div>
+                                         <p className="text-xs font-medium">
+                                             {event.type === 'worn' && "Worn at "}
+                                             {event.type === 'placed' && "Placed in "}
+                                             {event.type === 'verified' && "Verified in "}
+                                             <span className="font-bold">{event.location}</span>
+                                         </p>
+                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{event.date}</p>
+                                     </div>
+                                     {event.imageUrl && (
+                                         <img src={event.imageUrl} className="w-10 h-10 rounded object-cover border border-border shadow-sm" />
+                                     )}
+                                     {event.source === 'photo_ai' && (
+                                         <Badge variant="outline" className="text-[9px] h-5 px-1 bg-blue-50 text-blue-600 border-blue-200">
+                                             AI DETECTED
+                                         </Badge>
+                                     )}
+                                 </div>
+                             </div>
+                         ))}
+                     </div>
                 </div>
 
                 {/* Digital Artifacts Section */}
