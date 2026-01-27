@@ -16,8 +16,8 @@ const FEATURES = [
     {
         category: "Interface",
         icon: Zap,
-        title: "Liquid UX",
-        description: "A modern, gesture-first interface. Swipe to discover, tap to expand. Recommendations update live as you interact, keeping everything fluid and at your fingertips."
+        title: "Flow UX",
+        description: "Zero mental overhead. The interface attunes to your brain, adapting flows and information density to keep you in a state of flow at all times."
     },
     {
         category: "Insight",
