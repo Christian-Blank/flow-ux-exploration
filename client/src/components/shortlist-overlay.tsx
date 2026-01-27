@@ -131,6 +131,11 @@ export function ShortlistOverlay({ isOpen, onClose }: { isOpen: boolean; onClose
                                 }}
                                 onRemove={(id: string) => setSelectedForCompare(prev => prev.filter(i => i !== id))}
                                 onBuy={handleBuyClick}
+                                onAdd={(id: string) => {
+                                    if (!selectedForCompare.includes(id) && selectedForCompare.length < 3) {
+                                        setSelectedForCompare(prev => [...prev, id]);
+                                    }
+                                }}
                              />
                          </div>
                     ) : (
